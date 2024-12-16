@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const db = require('./db');
+const stripe = require('stripe')('sk_test_51QWg2AFz5vaiQFyZMYgiCpoZLJxsIWiyPor0FTmkcVmE0l9CUEygXpv7nKefiRu1k6GQKMyHD061uSN1tFJ9H50z00Os6Ehbf9'); 
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -199,6 +201,25 @@ app.post('/bookings', (req, res) => {
   });
 });
 
+app.post('/create-payment-intent', async (req, res) => {
+  try {
+    const { amount, currency } = req.body;
+
+    // Create a PaymentIntent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency,
+      payment_method_types: ['card'],
+    });
+
+    res.status(200).send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    console.error('Error creating PaymentIntent:', error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+});
 
 // Start the server
 app.listen(PORT, () => {

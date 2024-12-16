@@ -4,6 +4,8 @@ import { SafeAreaView, StyleSheet, Text, TextInput, Button, View } from 'react-n
 import { Slot } from 'expo-router';
 import SignInScreen from './src/screens/SignInScreen';
 import Home from './Htabs/home';
+import { StripeProvider } from '@stripe/stripe-react-native';
+
 
 
 const App = () => {
@@ -11,10 +13,13 @@ const App = () => {
   //(NotJustDev, 2021)
   return (
 
+    <StripeProvider publishableKey="pk_test_51QWg2AFz5vaiQFyZUlF1XhnDYqoflmz32Zp1603qKvacuMqONMbIm9rHtzO1r9nbmjkFniHJm6pLaLf2dF6PE8eU00og2dIHN9">
         <SafeAreaView style={styles.root}>
           
       <SignInScreen />
     </SafeAreaView>
+    </StripeProvider>
+
   );
 };
 
