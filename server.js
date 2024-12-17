@@ -221,6 +221,50 @@ app.post('/create-payment-intent', async (req, res) => {
   }
 });
 
+app.get('/bookings/user/:id', (req, res) => {
+  const userId = req.params.id;
+
+  const sql = `
+    SELECT 
+      bookings.id, 
+      bookings.date, 
+      bookings.description, 
+      bookings.status,
+      users.fullname AS handymanName
+    FROM bookings
+    JOIN users ON bookings.handyman_id = users.id
+    WHERE bookings.user_id = ?
+  `;
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching user bookings:', err);
+      return res.status(500).json({ error: 'Failed to fetch bookings.' });
+    }
+    res.status(200).json({ bookings: results });
+  });
+});
+
+app.patch('/bookings/cancel/:id', (req, res) => {
+  const bookingId = req.params.id;
+
+  const sql = `UPDATE bookings SET status = 'cancelled' WHERE id = ?`;
+
+  db.query(sql, [bookingId], (err, result) => {
+    if (err) {
+      console.error('Error canceling booking:', err);
+      return res.status(500).json({ error: 'Failed to cancel booking.' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Booking not found.' });
+    }
+
+    res.status(200).json({ message: 'Booking cancelled successfully.' });
+  });
+});
+
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

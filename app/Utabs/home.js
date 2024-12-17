@@ -47,6 +47,25 @@ const home = () => {
           </View>
         </View>
       </TouchableOpacity>
+
+       {/* Navigate to UserBookings */}
+       <TouchableOpacity
+        style={styles.card}
+        onPress={() => router.push("../src/screens/UserBookingsScreen")}
+      >
+        <View style={styles.cardContent}>
+          <Image
+            source={require('../assets/images/MyBookings.png')} //Handyman Icon generated through AI
+            style={styles.cardImage}
+          />
+          <View>
+            <Text style={styles.cardTitle}>My Bookings</Text>
+            <Text style={styles.cardDescription}>
+            Easily view and manage your scheduled bookings.
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
     </View>
 
      

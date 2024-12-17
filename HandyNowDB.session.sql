@@ -33,3 +33,6 @@ CREATE TABLE bookings (
 );
 
 ALTER TABLE bookings MODIFY COLUMN date DATE;
+
+ALTER TABLE bookings
+ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'pending';
