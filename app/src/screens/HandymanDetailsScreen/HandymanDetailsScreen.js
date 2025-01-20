@@ -13,6 +13,8 @@ import { useUser } from "../../context/UserContext";
 import DateTimePicker from "@react-native-community/datetimepicker"; 
 import axios from "axios"; // (Axios HTTP Requests)
 import { MaterialIcons } from "@expo/vector-icons"; // (Expo Vector Icons)
+import { FontAwesome } from "@expo/vector-icons";  // Import FontAwesome for stars
+
 
 const HandymanDetailsScreen = () => {
   const { selectedHandyman, user } = useUser();
@@ -76,6 +78,14 @@ const handleDateChange = (event, selectedDate) => {
           </View>
           <Text style={styles.title}>{selectedHandyman.fullname}</Text>
           <Text style={styles.location}>{selectedHandyman.county}</Text>
+        </View>
+
+  {/* Handyman Rating */}
+  <View style={styles.ratingContainer}>
+          <FontAwesome name="star" size={24} color="#FFD700" />
+          <Text style={styles.ratingText}>
+            {selectedHandyman.average_rating?.toFixed(2)}
+          </Text>
         </View>
 
         <View style={styles.section}>
@@ -206,6 +216,17 @@ const styles = StyleSheet.create({
   },
   skills: {
     fontSize: 16,
+    color: "#333",
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  ratingText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 8,
     color: "#333",
   },
   bookingForm: {

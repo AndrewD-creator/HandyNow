@@ -6,10 +6,12 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null); // Store user data, including fullname
   const [selectedHandyman, setSelectedHandyman] = useState(null); // Selected handyman details
+  const [selectedBooking, setSelectedBooking] = useState(null); // Store selected booking details
 
 
   return (
-    <UserContext.Provider value={{ user, setUser, selectedHandyman, setSelectedHandyman }}>
+    <UserContext.Provider value={{ user, setUser, selectedHandyman, setSelectedHandyman, selectedBooking,
+      setSelectedBooking, }}>
       {children}
     </UserContext.Provider>
   );

@@ -7,16 +7,19 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import { Picker } from '@react-native-picker/picker';
 import axios from "axios";
 import CustomButton from '../../components/CustomButton';
 import { useRouter } from "expo-router"; // (Expo Router for Navigation, 2024)
 import { useUser } from "../../context/UserContext"; // (React Context, 2024) 
+import { FontAwesome } from "@expo/vector-icons";  // Import FontAwesome for stars
 
-
-
+const skillOptions = ["Plumbing", "Electrical", "Carpentry", "Painting", "Landscaping"];
 
 const SearchHandymanScreen = () => {
   const [county, setCounty] = useState("");
+  const [skill, setSkill] = useState("");
+
   const [handymen, setHandymen] = useState([]);
   const [error, setError] = useState(null);
 
@@ -24,7 +27,7 @@ const SearchHandymanScreen = () => {
   const searchHandymen = async () => {
     try {
       const response = await axios.get(
-        `http://10.0.2.2:3000/search-handymen?county=${county}`
+        `http://10.0.2.2:3000/search-handymen?county=${county}&skill=${skill}`
       );
       setHandymen(response.data.handymen);
       console.log(response.data.handymen); 
@@ -58,6 +61,10 @@ const SearchHandymanScreen = () => {
       <Text style={styles.details}>County: {item.county}</Text>
       <Text style={styles.details}>Skills: {item.skills.join(", ")}</Text>
 
+      <View style={styles.ratingContainer}>
+        <FontAwesome name="star" size={16} color="#FFD700" />
+        <Text style={styles.ratingText}>{item.average_rating.toFixed(2)} </Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -72,6 +79,16 @@ const SearchHandymanScreen = () => {
         value={county}
         onChangeText={setCounty}
       />
+       <Picker
+        selectedValue={skill}
+        style={styles.picker}
+        onValueChange={(itemValue) => setSkill(itemValue)}
+      >
+        <Picker.Item label="Select a skill" value="" />
+        {skillOptions.map((skill) => (
+          <Picker.Item key={skill} label={skill} value={skill.toLowerCase()} />
+        ))}
+      </Picker>
       <CustomButton text="Search" onPress={searchHandymen} />
 
       {error && <Text style={styles.error}>{error}</Text>}
@@ -107,6 +124,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#fff",
   },
+  picker: {
+    height: 50,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 16,
+    backgroundColor: "#fff",
+  },
   list: {
     marginTop: 16,
   },
@@ -125,6 +150,17 @@ const styles = StyleSheet.create({
   details: {
     fontSize: 14,
     marginTop: 4,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  ratingText: {
+    marginLeft: 5,
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
   },
   error: {
     color: "red",

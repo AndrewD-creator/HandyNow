@@ -36,3 +36,8 @@ ALTER TABLE bookings MODIFY COLUMN date DATE;
 
 ALTER TABLE bookings
 ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'pending';
+
+ALTER TABLE reviews
+CHANGE COLUMN review comment TEXT;
+
+DESCRIBE reviews;
