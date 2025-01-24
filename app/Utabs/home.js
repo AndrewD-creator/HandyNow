@@ -29,24 +29,7 @@ const home = () => {
         </View>
       </TouchableOpacity>
 
-      {/* Navigate to Payment */}
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => router.push("../src/screens/PaymentScreen")}
-      >
-        <View style={styles.cardContent}>
-          <Image
-            source={require('../assets/images/HandymanIcon2.png')} //Handyman Icon generated through AI
-            style={styles.cardImage}
-          />
-          <View>
-            <Text style={styles.cardTitle}>Payment</Text>
-            <Text style={styles.cardDescription}>
-              Search for available handymen in your area and get the help you need.
-            </Text>
-          </View>
-        </View>
-      </TouchableOpacity>
+      
 
        {/* Navigate to UserBookings */}
        <TouchableOpacity

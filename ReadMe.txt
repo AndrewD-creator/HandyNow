@@ -15,11 +15,12 @@ Bibliography
 •   React Native DateTimePicker Documentation. Available at: https://www.npmjs.com/package/@react-native-community/datetimepicker
 •   Expo Vector Icons. Available at: https://docs.expo.dev/guides/icons/
 •   Expo documentation, Available at: https://docs.expo.dev/
+•   React Native FlatList (2024) Available at: https://reactnative.dev/docs/flatlist
 •   MDN (2024), Available at: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Control_flow_and_error_handling
 •   React Native Documentation - ScrollView. Available at: https://reactnative.dev/docs/scrollview
 •   React Native Community Picker. Available at: https://github.com/react-native-picker/picker
 •   Card Component, Available at: https://callstack.github.io/react-native-paper/docs/components/Card/
-•
-•
-•
+•   Axios Docs Error Handling in Axios (2024), Available at: https://axios-http.com/docs/handling_errors
+•   FontAwesome Star Rating Example (2024). Available at: https://github.com/djchie/react-native-star-rating
+•   Stripe React Native Documentation (2024). Available at: https://stripe.com/docs/payments/accept-a-payment?platform=react-native
 •

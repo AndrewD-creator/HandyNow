@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Alert, TouchableOpacity } from 'react-native';
-import axios from 'axios';
-import { useUser } from '../../context/UserContext';
+import axios from 'axios'; // (Axios HTTP Requests)
+import { useUser } from '../../context/UserContext'; // (React Context, 2024)
 
+// (ChatGPT) - Prompt: How to fetch job requests for a handyman and respond with accept or decline
 const JobRequestsScreen = () => {
   const { user } = useUser(); // Fetch logged-in handyman details
   const [requests, setRequests] = useState([]); // Store job requests
   const [loading, setLoading] = useState(true); // Loading state
 
-  // Fetch job requests for the logged-in handyman
+  // Fetch job requests for the logged-in handyman (inspired by axios documentation, 2024)
   useEffect(() => {
     const fetchJobRequests = async () => {
       try {
@@ -35,7 +36,7 @@ const JobRequestsScreen = () => {
     if (user?.id) fetchJobRequests();
   }, [user?.id]);
 
-  // Function to handle accept or decline actions
+  // Function to handle accept or decline actions (ChatGPT - Prompt: How to update job request status via API)
   const handleResponse = async (id, status) => {
     try {
       const response = await axios.patch(`http://10.0.2.2:3000/bookings/respond/${id}`, { status });
@@ -51,7 +52,7 @@ const JobRequestsScreen = () => {
     }
   };
 
-  // Render individual job request card
+  // Render individual job request card (React Native Documentation - FlatList, 2024)
   const renderRequest = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.title}>{item.customerName}</Text>
@@ -92,6 +93,7 @@ const JobRequestsScreen = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f9f9f9' },
   header: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
@@ -105,3 +107,10 @@ const styles = StyleSheet.create({
 });
 
 export default JobRequestsScreen;
+
+// References:
+// • React Native Documentation (2024). Available at: https://reactnative.dev/docs/components-and-apis
+// • Axios HTTP Requests (2024). Available at: https://github.com/axios/axios
+// • React Context (2024). Available at: https://react.dev/reference/react/useContext
+// • ChatGPT (2024) Prompt: How to fetch job requests for a handyman and respond with accept or decline?
+// • React Native FlatList (2024). Available at: https://reactnative.dev/docs/flatlist

@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Alert, TouchableOpacity } from 'react-native';
-import axios from 'axios';
-import { useUser } from '../../context/UserContext';
-import { useRouter } from 'expo-router';
+import axios from 'axios'; // (Axios, 2024)
+import { useUser } from '../../context/UserContext'; // (React Context, 2024)
+import { useRouter } from 'expo-router'; // (Expo Router, 2024)
 
 
 const UserBookingsScreen = () => {
   const router = useRouter();
   const { user } = useUser(); // Fetch logged-in user details
-  const [bookings, setBookings] = useState([]); // Store bookings
-  const [loading, setLoading] = useState(true); // Loading state
-  const [filter, setFilter] = useState('active'); // Default filter
+  const [bookings, setBookings] = useState([]); // Store bookings (React useState, 2024)
+  const [loading, setLoading] = useState(true); // Loading state (React useState, 2024)
+  const [filter, setFilter] = useState('active'); // Default filter (React useState, 2024)
   const { setSelectedHandyman, setSelectedBooking } = useUser();
 
 
-  // Fetch bookings for the logged-in user with selected filter
+  // Fetch bookings for the logged-in user with selected filter (Axios HTTP Requests, 2024)
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -33,6 +33,8 @@ const UserBookingsScreen = () => {
     if (user?.id) fetchBookings();
   }, [user?.id, filter]);
 
+
+    // Confirm job completion & cancellation (ChatGPT Prompt: How do i implement buttons mark as complet to change status to complete and cancel which changes to status to cancelled)
   const handleConfirmComplete = async (bookingId) => {
     Alert.alert(
       "Confirm Job Completion",
@@ -186,6 +188,8 @@ const UserBookingsScreen = () => {
     }
   };
 
+  // ChatGPT by OpenAI (2024) Prompt: "How do i add filters active, past and all"
+  // React Native FlatList (2024)
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Bookings</Text>
@@ -230,6 +234,7 @@ const UserBookingsScreen = () => {
   
 };
 
+//Adapted from OpenAI, (2024) & React Native Styling
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -352,3 +357,11 @@ const styles = StyleSheet.create({
 });
 
 export default UserBookingsScreen;
+
+// References:
+// Axios (2024) Available at: https://axios-http.com/docs/intro
+// React Context (2024) Available at: https://react.dev/reference/react/useContext
+// Expo Router (2024) Available at: https://expo.github.io/router/docs
+// React Native FlatList (2024) Available at: https://reactnative.dev/docs/flatlist
+// React Native Styling (2024), Available at:: https://reactnative.dev/docs/style
+// ChatGPT by OpenAI (2024) 

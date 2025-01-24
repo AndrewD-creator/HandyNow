@@ -5,6 +5,7 @@ import { useRouter } from "expo-router"; //(Expo Router for Navigation, 2024)
 const home = () => {
   const router = useRouter();
 
+  // Inspired by Card Component
   return (
     <View style={styles.container}>
       <Text style={styles.title}>handyman home</Text>
@@ -106,3 +107,9 @@ const styles = StyleSheet.create({
 });
 
 export default home;
+
+// References:
+// Card Component, Available at: https://callstack.github.io/react-native-paper/docs/components/Card/
+// React Native Styling (2024), Available at:: https://reactnative.dev/docs/style
+// Expo Router Documentation (2024). Available at: https://expo.github.io/router/docs/
+// ChatGPT by OpenAI

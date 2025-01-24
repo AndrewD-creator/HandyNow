@@ -7,7 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { Picker } from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker'; // React Native Community Picker GitHub Repository (2024)
 import axios from "axios";
 import CustomButton from '../../components/CustomButton';
 import { useRouter } from "expo-router"; // (Expo Router for Navigation, 2024)
@@ -54,6 +54,7 @@ const SearchHandymanScreen = () => {
     router.push("src/screens/HandymanDetailsScreen"); 
   };
 
+// inspired by Card Componenet
 //ChatGPT: Prompt - How do i display handymen cards with their name, county & skills
   const renderHandyman = ({ item }) => (
     <TouchableOpacity style={styles.card} onPress={() => handleHandymanPress(item)}>
@@ -70,6 +71,7 @@ const SearchHandymanScreen = () => {
 
 //(React Native Doc - Flatlist, 2024)
 // (custom button and inputs inspired by NotJustDev, 2021)
+// React Native Community Picker GitHub Repository (2024)
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Search for Handymen</Text>
@@ -171,9 +173,11 @@ const styles = StyleSheet.create({
 export default SearchHandymanScreen;
 
 //References:
-// • React Native Styling (2024), Available at:: https://reactnative.dev/docs/style
-// • Expo Router for Navigation (2024), Available at:: https://expo.github.io/router/docs/
-// • OpenAI - ChatGPT
-// •	NotJustDev (2021) React Native Login Authentication PART 1 (step-by-step tutorial) Available at: https://www.youtube.com/watch?v=ALnJLbjI7EY (Accessed on: 02/11/24)
-// • Axios Docs Error Handling in Axios (2024), Available at: https://axios-http.com/docs/handling_errors
-// • React Context (2024), Available at:: https://react.dev/reference/react/useContext
+// React Native Styling (2024), Available at:: https://reactnative.dev/docs/style
+// Expo Router for Navigation (2024), Available at:: https://expo.github.io/router/docs/
+// OpenAI - ChatGPT
+// NotJustDev (2021) React Native Login Authentication PART 1 (step-by-step tutorial) Available at: https://www.youtube.com/watch?v=ALnJLbjI7EY (Accessed on: 02/11/24)
+// Axios Docs Error Handling in Axios (2024), Available at: https://axios-http.com/docs/handling_errors
+// React Context (2024), Available at:: https://react.dev/reference/react/useContext
+// React Native Community Picker GitHub Repository (2024). Available at: https://github.com/react-native-picker/picker
+// Card Component, Available at: https://callstack.github.io/react-native-paper/docs/components/Card/

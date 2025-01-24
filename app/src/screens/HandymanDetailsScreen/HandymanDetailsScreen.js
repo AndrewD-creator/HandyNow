@@ -9,18 +9,21 @@ import {
   Alert,
   Platform,
 } from "react-native";
-import { useUser } from "../../context/UserContext";
-import DateTimePicker from "@react-native-community/datetimepicker"; 
+import { useUser } from "../../context/UserContext"; //(React Context, 2024)
+import DateTimePicker from "@react-native-community/datetimepicker"; // (React Native DateTimePicker, 2024)
 import axios from "axios"; // (Axios HTTP Requests)
+import { useRouter } from "expo-router"; // (Expo Router for Navigation, 2024)
 import { MaterialIcons } from "@expo/vector-icons"; // (Expo Vector Icons)
-import { FontAwesome } from "@expo/vector-icons";  // Import FontAwesome for stars
+import { FontAwesome } from "@expo/vector-icons";  // (Expo Vector Icons)
 
 
 const HandymanDetailsScreen = () => {
-  const { selectedHandyman, user } = useUser();
+  const { selectedHandyman, user, setSelectedBooking } = useUser();
   const [date, setDate] = useState(new Date());
   const [description, setDescription] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const router = useRouter();
+
 
     // Booking logic (OpenAI, 2024)
   const handleBooking = async () => {
@@ -45,6 +48,12 @@ const HandymanDetailsScreen = () => {
         setDate(new Date());
         setDescription("");
       }
+      // Store booking details in context
+      setSelectedBooking(response.data);
+
+      // Navigate to the payment screen
+      router.push("src/screens/PaymentScreen");
+
     } catch (error) {
       console.error("Error creating booking:", error);
       Alert.alert("Error", "Failed to create booking. Please try again.");
@@ -66,7 +75,7 @@ const handleDateChange = (event, selectedDate) => {
     );
   }
 
-    // Main UI (adapted from Material UI styling, React Native TextInput Documentation, & OpenAI, 2024)
+    // Main UI (adapted from Material UI styling, React Native TextInput Documentation, & OpenAI Prompt: - How do I make my handymanDetails page include their average rating along with their skills, 2024)
   return (
     <View style={styles.container}>
       <View style={styles.card}>

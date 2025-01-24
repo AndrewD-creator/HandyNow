@@ -7,18 +7,21 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import { CardField, useStripe } from '@stripe/stripe-react-native';
-import { FontAwesome } from '@expo/vector-icons'; // For lock icon
-import axios from 'axios';
+import { CardField, useStripe } from '@stripe/stripe-react-native'; // (Stripe React Native, 2024)
+import { FontAwesome } from '@expo/vector-icons'; // For lock icon (Expo Vector Icons, 2024)
+import axios from 'axios'; // (Axios HTTP Requests, 2024)
+import { useRouter } from "expo-router"; // (Expo Router for Navigation, 2024)
 
+// (ChatGPT) - Prompt: How do I implement a payment screen in React Native using Stripe API and handle navigation after successful payment
 const PaymentScreen = () => {
   const { confirmPayment } = useStripe();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [cardholderName, setCardholderName] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [cardDetails, setCardDetails] = useState(null);
 
-  // Function to handle payment
+  // Function to handle payment (Axios HTTP Requests, 2024)
   const handlePayment = async () => {
     if (!email || !cardholderName || !cardDetails?.complete) {
       Alert.alert('Error', 'Please fill in all fields and complete card details.');
@@ -44,7 +47,15 @@ const PaymentScreen = () => {
       if (error) {
         Alert.alert('Payment Failed', error.message);
       } else if (paymentIntent) {
-        Alert.alert('Success', `Payment successful! ID: ${paymentIntent.id}`);
+        Alert.alert('Success', `Payment successful! ID: ${paymentIntent.id}`, [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Navigate back to the home screen after successful payment (Expo Router for Navigation, 2024)
+              router.replace("Utabs/home");
+            }
+          }
+        ]);
       }
     } catch (error) {
       console.error('Error processing payment:', error);
@@ -95,6 +106,7 @@ const PaymentScreen = () => {
   );
 };
 
+// React Native styling (React Native Documentation, 2024)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -149,3 +161,11 @@ const styles = StyleSheet.create({
 });
 
 export default PaymentScreen;
+
+// References:
+// • React Native Documentation (2024). Available at: https://reactnative.dev/docs/components-and-apis
+// • Stripe React Native Documentation (2024). Available at: https://stripe.com/docs/payments/accept-a-payment?platform=react-native
+// • Axios Documentation (2024). Available at: https://axios-http.com/docs/intro
+// • Expo Router Documentation (2024). Available at: https://expo.github.io/router/docs/
+// • Expo Vector Icons Documentation (2024). Available at: https://docs.expo.dev/guides/icons/
+// • ChatGPT (2024). Prompt: How do I implement a payment screen in React Native using Stripe API and handle navigation after successful payment

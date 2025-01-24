@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Alert, TouchableOpacity } from 'react-native';
-import axios from 'axios';
-import { useUser } from '../../context/UserContext';
+import axios from 'axios'; // (Axios Documentation, 2024)
+import { useUser } from '../../context/UserContext'; // (React Context, 2024)
 
+// (ChatGPT) - Prompt: How do I fetch and display job listings for a logged-in handyman with an option to mark them as complete?
 const MyJobsScreen = () => {
   const { user } = useUser(); // Get the logged-in handyman's details
   const [jobs, setJobs] = useState([]); // Store handyman's jobs
   const [loading, setLoading] = useState(true); // Loading state
 
-  // Fetch jobs for the logged-in handyman
+  // Fetch jobs for the logged-in handyman (Axios Documentation, 2024)
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -25,6 +26,7 @@ const MyJobsScreen = () => {
     if (user?.id) fetchJobs();
   }, [user?.id]);
 
+    // Function to handle job completion (ChatGPT, 2024)
   const handleCompleteJob = async (jobId) => {
     try {
       await axios.patch(`http://10.0.2.2:3000/bookings/mark-complete/${jobId}`);
@@ -40,7 +42,7 @@ const MyJobsScreen = () => {
   
   
 
-  // Render individual job card
+  // Render individual job card (React Native FlatList Documentation, 2024)
   const renderJob = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.title}>{item.customerName || 'Customer'}</Text>
@@ -73,6 +75,7 @@ const MyJobsScreen = () => {
   );
 };
 
+// React Native styling (React Native Documentation, 2024)
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f9f9f9' },
   header: { fontSize: 24, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' },
@@ -91,3 +94,10 @@ const styles = StyleSheet.create({
 });
 
 export default MyJobsScreen;
+
+// References:
+// • React Native Documentation (2024). Available at: https://reactnative.dev/docs/components-and-apis
+// • Axios Documentation (2024). Available at: https://axios-http.com/docs/intro
+// • React Context (2024). Available at: https://react.dev/reference/react/useContext
+// • React Native FlatList Documentation (2024). Available at: https://reactnative.dev/docs/flatlist
+// • ChatGPT (2024).

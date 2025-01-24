@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
-import { useUser } from "../../context/UserContext";
-import axios from "axios";
-import { FontAwesome } from "@expo/vector-icons"; // Import star icons from Expo
+import { useRouter } from "expo-router"; // (Expo Router for Navigation, 2024)
+import { useUser } from "../../context/UserContext"; // (React Context, 2024)
+import axios from "axios"; // (Axios HTTP Requests, 2024)
+import { FontAwesome } from "@expo/vector-icons"; // Import star icons (Expo Vector Icons, 2024)
 
+
+// (ChatGPT) - Prompt: How can I create a review system in React Native where users can rate a handyman with a star rating system
 const ReviewScreen = () => {
   const router = useRouter();
   const { user, selectedBooking } = useUser();  // Ensure user is retrieved from context
@@ -21,6 +23,7 @@ const ReviewScreen = () => {
     }
   }, [selectedBooking, user]);
 
+    // Handle review submission (Axios HTTP Requests, 2024)
   const handleSubmitReview = async () => {
     if (rating === 0) {
       Alert.alert("Error", "Please provide a rating before submitting.");
@@ -36,7 +39,7 @@ const ReviewScreen = () => {
       const response = await axios.post("http://10.0.2.2:3000/reviews", {
         handyman_id: selectedBooking.handyman_id,
         booking_id: selectedBooking.id,
-        user_id: user.id, // Ensure user ID is correctly included
+        user_id: user.id, 
         rating,
         comment,
       });
@@ -60,10 +63,12 @@ const ReviewScreen = () => {
     return null; // Avoid rendering if data is not available
   }
 
+  // FontAwesome Star Rating (2024). 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Rate & Review</Text>
       <Text style={styles.label}>Handyman: {selectedBooking.handymanName}</Text>
+
 
       <Text style={styles.label}>Rating:</Text>
       <View style={styles.starContainer}>
@@ -95,6 +100,7 @@ const ReviewScreen = () => {
   );
 };
 
+// React Native styling (React Native Documentation, 2024)
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
   title: { fontSize: 28, fontWeight: "bold", textAlign: "center", marginBottom: 16, color: "#333" },
@@ -128,3 +134,12 @@ const styles = StyleSheet.create({
 });
 
 export default ReviewScreen;
+
+
+// References:
+// • React Native Documentation (2024). Available at: https://reactnative.dev/docs/components-and-apis
+// • Expo Router Documentation (2024). Available at: https://expo.github.io/router/docs/
+// • Axios HTTP Requests (2024). Available at: https://axios-http.com/docs/intro
+// • Expo Vector Icons (2024). Available at: https://docs.expo.dev/guides/icons/
+// • FontAwesome Star Rating Example (2024). Available at: https://github.com/djchie/react-native-star-rating
+// • ChatGPT by OpenAI 

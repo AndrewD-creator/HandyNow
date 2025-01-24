@@ -88,7 +88,7 @@ app.post('/login', (req, res) => {
   });
 });
 
-// Endpoint to update a user's profile (OpenAI)
+// Endpoint to update a user's profile (OpenAI ChatGPT) - Prompt: "How can I update user profile details like bio and skills in a MySQL database?"
 app.put('/users/:id/profile', (req, res) => {
   const { id } = req.params; // User ID
   const { bio, skills } = req.body; // Bio and skills from the request
@@ -106,7 +106,7 @@ app.put('/users/:id/profile', (req, res) => {
   });
 });
 
-// Endpoint to fetch a user's profile (OpenAI)
+// (ChatGPT) - Prompt: "How do I fetch user profile details from a MySQL database using Express and Node.js?"
 app.get('/users/:id/profile', (req, res) => {
   const { id } = req.params;
 
@@ -148,7 +148,7 @@ app.get('/users/:id', (req, res) => {
   });
 });
 
-//(OpenAI)
+// (ChatGPT) - Prompt: "How can I implement an API to search for handymen based on location and skill using SQL and Express?"
 app.get('/search-handymen', (req, res) => {
   console.log('Search handymen route hit');
 
@@ -203,7 +203,7 @@ app.get('/search-handymen', (req, res) => {
 });
 
 
-//(OpenAI)
+// (ChatGPT) - Prompt: "How do I create an API endpoint to insert bookings into a MySQL database using Node.js and Express?"
 app.post('/bookings', (req, res) => {
   const { handymanId, userId, date, description } = req.body;
 
@@ -223,6 +223,7 @@ app.post('/bookings', (req, res) => {
   });
 });
 
+// (ChatGPT) - Prompt: "How to integrate Stripe payment processing into an Express.js application?"
 app.post('/create-payment-intent', async (req, res) => {
   try {
     const { amount, currency } = req.body;
@@ -243,6 +244,7 @@ app.post('/create-payment-intent', async (req, res) => {
   }
 });
 
+// (ChatGPT) - Prompt: "How do I fetch user bookings from a MySQL database with filtering (active, past, all) using Express?"
 app.get('/bookings/user/:id', (req, res) => {
   const userId = req.params.id;
   const filter = req.query.filter; // Extract the filter query parameter
@@ -290,7 +292,7 @@ app.get('/bookings/user/:id', (req, res) => {
   });
 });
 
-
+// (ChatGPT) - Prompt: "How can I implement an API endpoint to cancel a booking in an Express app and MySQL database?"
 app.patch('/bookings/cancel/:id', (req, res) => {
   const bookingId = req.params.id;
 
@@ -310,7 +312,7 @@ app.patch('/bookings/cancel/:id', (req, res) => {
   });
 });
 
-// Fetch pending job requests for a handyman
+// (ChatGPT) - Prompt: "How to create an endpoint that fetches pending job requests for a specific handyman?"
 app.get("/bookings/requests/:handymanId", (req, res) => {
   const handymanId = req.params.handymanId;
 
@@ -350,7 +352,7 @@ app.get("/bookings/requests/:handymanId", (req, res) => {
 
 
 
-// Endpoint to update booking status from job requests
+// (ChatGPT) - Prompt: "How to update booking status from job requests
 app.patch('/bookings/respond/:id', async (req, res) => {
   const bookingId = req.params.id;
   const { status } = req.body; // Accept or Decline
@@ -364,6 +366,7 @@ app.patch('/bookings/respond/:id', async (req, res) => {
   }
 });
 
+// (ChatGPT) - Prompt: "How do I fetch a handyman's confirmed jobs"
 app.get('/bookings/my-jobs/:handymanId', async (req, res) => {
   const handymanId = req.params.handymanId;
 
@@ -400,6 +403,7 @@ app.get('/bookings/my-jobs/:handymanId', async (req, res) => {
   });
 });
 
+// (ChatGPT) - Prompt: "How do I implement an API endpoint to mark a job as completed and update its status in MySQL?"
 app.patch('/bookings/mark-complete/:id', async (req, res) => {
   const bookingId = req.params.id;
 
@@ -413,6 +417,7 @@ app.patch('/bookings/mark-complete/:id', async (req, res) => {
   }
 });
 
+// (ChatGPT) - Prompt: "How do I confirm job completion by a customer"
 app.patch('/bookings/complete/:id', (req, res) => {
   const bookingId = req.params.id;
 
@@ -436,6 +441,7 @@ app.patch('/bookings/complete/:id', (req, res) => {
   });
 });
 
+// (ChatGPT) - Prompt: "How to allow users to submit reviews for handymen?"
 app.post('/reviews', async (req, res) => {
   const { booking_id, handyman_id, user_id, rating, comment } = req.body;
 
@@ -464,9 +470,7 @@ app.post('/reviews', async (req, res) => {
   }
 });
 
-
-
-
+// (ChatGPT) - Prompt: "How to fetch and display reviews and ratings for a specific handyman from a MySQL databases?"
 app.get('/reviews/handyman/:handyman_id', async (req, res) => {
   const { handyman_id } = req.params;
 
