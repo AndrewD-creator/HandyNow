@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert} from 'react-native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
+import API_URL from "../../config/apiConfig"; 
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
+import { Picker } from '@react-native-picker/picker';  
+
 
 //(NotJustDev, 2021)
 const SignUpScreen = () => {
@@ -11,8 +14,14 @@ const SignUpScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordRepeat, setPasswordRepeat] = useState('');
+   const [address, setAddress] = useState('');
+    const [eircode, setEircode] = useState('');
+    const [county, setCounty] = useState('');
 
   const router = useRouter(); // Initialize the router
+
+  const counties = ['Dublin', 'Cork', 'Limerick', 'Galway', 'Waterford'];  
+
 
   const onSignInPressed = () => {
     router.push('src/screens/SignInScreen'); // Navigate to the SignInScreen
@@ -29,7 +38,7 @@ const SignUpScreen = () => {
       return;
     }
 
-    if (!username || !email || !password ) {
+    if (!username || !email || !password || !address || !eircode || !county) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -37,9 +46,12 @@ const SignUpScreen = () => {
 // (ChatGPT) -Prompt: I want to be able to add users who register into my connected database
 
     try {
-        const response = await axios.post('http://10.0.2.2:3000/users', {
+        const response = await axios.post(`${API_URL}/users`, {
           name: username,
           email: email,
+          address: address,
+          eircode: eircode,
+          county: county,
           password: password,
           role: 'user',
           
@@ -72,6 +84,21 @@ const SignUpScreen = () => {
           value={email}
           setValue={setEmail}
         />
+        {/* County Picker */}
+        <Picker
+          selectedValue={county}
+          onValueChange={(itemValue) => setCounty(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Select a County" value="" />
+          {counties.map((countyName, index) => (
+            <Picker.Item key={index} label={countyName} value={countyName} />
+          ))}
+        </Picker>
+    <CustomInput placeholder="Address" value={address} setValue={setAddress} />
+        <CustomInput placeholder="Eircode" value={eircode} setValue={setEircode} />
+        
+        
 
         <CustomInput
           placeholder="Password"
@@ -123,6 +150,19 @@ const styles = StyleSheet.create({
   },
   link: {
     color: '#0000EE',
+  },
+  picker: {
+    backgroundColor: 'white',
+        width: '100%',
+        borderColor: '#e8e8e8',
+        borderWidth: 1,
+        borderRadius: 5,
+
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+        marginBottom: 5,
+        marginTop: 10,
+
   },
 });
 

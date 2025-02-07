@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Alert, StyleSheet, ScrollView, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
+import API_URL from "../../config/apiConfig"; 
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 import { Picker } from '@react-native-picker/picker';  
@@ -39,7 +40,7 @@ const HandymanSignUpScreen = () => {
       console.log('Sending registration data:', {
         username, fullName, email, phone, password, address, eircode, county, role: 'handyman',
       });
-      const response = await axios.post('http://10.0.2.2:3000/users', {
+      const response = await axios.post(`${API_URL}/users`, {
         name: username,
         fullname: fullName,
         email: email,

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Picker } from '@react-native-picker/picker'; // React Native Community Picker GitHub Repository (2024)
 import axios from "axios";
+import API_URL from "../../config/apiConfig"; 
 import CustomButton from '../../components/CustomButton';
 import { useRouter } from "expo-router"; // (Expo Router for Navigation, 2024)
 import { useUser } from "../../context/UserContext"; // (React Context, 2024) 
@@ -27,7 +28,7 @@ const SearchHandymanScreen = () => {
   const searchHandymen = async () => {
     try {
       const response = await axios.get(
-        `http://10.0.2.2:3000/search-handymen?county=${county}&skill=${skill}`
+        `${API_URL}/search-handymen?county=${county}&skill=${skill}`
       );
       setHandymen(response.data.handymen);
       console.log(response.data.handymen); 
@@ -61,6 +62,7 @@ const SearchHandymanScreen = () => {
       <Text style={styles.name}>{item.fullname}</Text>
       <Text style={styles.details}>County: {item.county}</Text>
       <Text style={styles.details}>Skills: {item.skills.join(", ")}</Text>
+      <Text style={styles.details}>💰 Hourly Rate: €{item.hourly_rate || "N/A"}</Text>
 
       <View style={styles.ratingContainer}>
         <FontAwesome name="star" size={16} color="#FFD700" />

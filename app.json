@@ -12,8 +12,8 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff",
       "router": {
-      "srcDir": "app"
-    }
+        "srcDir": "app"
+      }
     },
     "ios": {
       "supportsTablet": true
@@ -34,6 +34,12 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "785400ce-d167-477a-bc5e-2fe474a39aef"
+      }
+    },
+    "owner": "andrewdwyer123"
   }
 }

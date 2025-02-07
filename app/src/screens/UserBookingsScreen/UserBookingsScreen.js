@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios'; // (Axios, 2024)
+import API_URL from "../../config/apiConfig"; 
 import { useUser } from '../../context/UserContext'; // (React Context, 2024)
 import { useRouter } from 'expo-router'; // (Expo Router, 2024)
 
@@ -19,7 +20,7 @@ const UserBookingsScreen = () => {
     const fetchBookings = async () => {
       try {
         const response = await axios.get(
-          `http://10.0.2.2:3000/bookings/user/${user.id}?filter=${filter}`
+          `${API_URL}/bookings/user/${user.id}?filter=${filter}`
         );
         setBookings(response.data.bookings);
       } catch (error) {
@@ -46,7 +47,7 @@ const UserBookingsScreen = () => {
           onPress: async () => {
             try {
               const response = await axios.patch(
-                `http://10.0.2.2:3000/bookings/complete/${bookingId}`
+                `${API_URL}/bookings/complete/${bookingId}`
               );
   
               Alert.alert("Success", response.data.message);
@@ -87,7 +88,7 @@ const UserBookingsScreen = () => {
             try {
               // Call the backend to cancel the booking
               const response = await axios.patch(
-                `http://10.0.2.2:3000/bookings/cancel/${bookingId}`
+                `${API_URL}/bookings/cancel/${bookingId}`
               );
               Alert.alert("Success", "Booking cancelled successfully!");
   
@@ -168,6 +169,19 @@ const UserBookingsScreen = () => {
       </TouchableOpacity>
       
       )}
+
+       {/* View Invoice Button (Only if job is completed) */}
+    {item.status === "completed" && (
+      <TouchableOpacity
+        style={styles.invoiceButton}
+        onPress={() => router.push({
+          pathname: "src/screens/InvoiceScreen",
+          params: { bookingId: item.id }, // ✅ Pass Booking ID
+        })}
+      >
+        <Text style={styles.invoiceButtonText}>View Invoice</Text>
+      </TouchableOpacity>
+          )}
     </View>
   );
   
@@ -348,6 +362,23 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   reviewButtonText: {
+    color: "#fff", // White text
+    fontSize: 16,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+  invoiceButton: {
+    marginTop: 10,
+    backgroundColor: "#34dbeb", // Bright orange color
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    elevation: 3, // Adds a shadow for Android
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  invoiceButtonText: {
     color: "#fff", // White text
     fontSize: 16,
     fontWeight: "bold",

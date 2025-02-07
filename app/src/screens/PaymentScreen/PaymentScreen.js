@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,41 +7,85 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import { CardField, useStripe } from '@stripe/stripe-react-native'; // (Stripe React Native, 2024)
-import { FontAwesome } from '@expo/vector-icons'; // For lock icon (Expo Vector Icons, 2024)
-import axios from 'axios'; // (Axios HTTP Requests, 2024)
-import { useRouter } from "expo-router"; // (Expo Router for Navigation, 2024)
+import { CardField, useStripe } from '@stripe/stripe-react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import axios from 'axios';
+import API_URL from "../../config/apiConfig"; 
+import { useRouter } from "expo-router";
+import { useUser } from "../../context/UserContext"; // ✅ Access selected booking
 
-// (ChatGPT) - Prompt: How do I implement a payment screen in React Native using Stripe API and handle navigation after successful payment
 const PaymentScreen = () => {
   const { confirmPayment } = useStripe();
   const router = useRouter();
+  const { selectedBooking } = useUser(); // ✅ Get selected booking details
+  console.log("📌 Loaded Selected Booking in PaymentScreen:", selectedBooking);
+  const { selectedHandyman } = useUser(); 
   const [email, setEmail] = useState('');
   const [cardholderName, setCardholderName] = useState('');
-  const [postalCode, setPostalCode] = useState('');
   const [cardDetails, setCardDetails] = useState(null);
+  const [totalAmount, setTotalAmount] = useState(null); // ✅ Store price in cents
 
-  // Function to handle payment (Axios HTTP Requests, 2024)
+  // 🔹 Fetch calculated price when screen loads
+  useEffect(() => {
+    if (selectedBooking) {
+      fetchPrice();
+    }
+  }, [selectedBooking]);  // ✅ Runs when `selectedBooking` changes
+  
+      console.log(`🔍 Fetching price for Handyman ID: ${selectedBooking.handyman_id}, Duration: ${selectedBooking.duration}`);
+
+      const fetchPrice = async () => {
+        if (!selectedBooking?.handyman_id || !selectedBooking?.duration) {
+          console.error("❌ Missing handyman ID or duration!", selectedBooking);
+          return;
+        }
+      
+        console.log(`🔍 Fetching price for Handyman ID: ${selectedBooking.handyman_id}, Duration: ${selectedBooking.duration}`);
+      
+        try {
+          const response = await axios.get(`${API_URL}/calculate-price`, {
+            params: {
+              handymanId: selectedBooking.handyman_id,
+              duration: selectedBooking.duration,
+            },
+          });
+      
+          console.log("✅ Price API Response:", response.data);
+          setTotalAmount(response.data.price);  // ✅ Correct state update
+      
+        } catch (error) {
+          console.error("❌ Error fetching price:", error);
+          setTotalAmount(null); // Prevent undefined issues
+        }
+      };
+      
+  
+
+  // 🔹 Handle Payment Process
   const handlePayment = async () => {
     if (!email || !cardholderName || !cardDetails?.complete) {
       Alert.alert('Error', 'Please fill in all fields and complete card details.');
       return;
     }
 
+    if (!totalAmount) {
+      Alert.alert('Error', 'Price calculation failed. Please try again.');
+      return;
+    }
+
     try {
-      const response = await axios.post('http://10.0.2.2:3000/create-payment-intent', {
-        amount: 1000, // €10.00 in cents
+      // ✅ Step 1: Create Payment Intent
+      const response = await axios.post(`${API_URL}/create-payment-intent`, {
+        amount: totalAmount, // ✅ Use dynamically fetched amount
         currency: 'eur',
       });
 
       const { clientSecret } = response.data;
 
+      // ✅ Step 2: Confirm Payment
       const { error, paymentIntent } = await confirmPayment(clientSecret, {
         paymentMethodType: 'Card',
-        billingDetails: {
-          email,
-          name: cardholderName,
-        },
+        billingDetails: { email, name: cardholderName },
       });
 
       if (error) {
@@ -50,10 +94,7 @@ const PaymentScreen = () => {
         Alert.alert('Success', `Payment successful! ID: ${paymentIntent.id}`, [
           {
             text: 'OK',
-            onPress: () => {
-              // Navigate back to the home screen after successful payment (Expo Router for Navigation, 2024)
-              router.replace("Utabs/home");
-            }
+            onPress: () => router.replace("Utabs/home"),
           }
         ]);
       }
@@ -67,8 +108,8 @@ const PaymentScreen = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Payment</Text>
 
-   {/* Cardholder Name */}
-   <Text style={styles.label}>Name on Card</Text>
+      {/* Cardholder Name */}
+      <Text style={styles.label}>Name on Card</Text>
       <TextInput
         style={styles.input}
         placeholder="Cardholder Name"
@@ -90,82 +131,43 @@ const PaymentScreen = () => {
       <Text style={styles.label}>Card Information</Text>
       <CardField
         postalCodeEnabled={true}
-        placeholder={{
-          number: '4242 4242 4242 4242',
-        }}
+        placeholder={{ number: '4242 4242 4242 4242' }}
         style={styles.cardField}
         onCardChange={(details) => setCardDetails(details)}
       />
-      
-      {/* Pay Button */}
+
+      {/* Pay Button - Display Dynamic Price */}
       <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
-        <Text style={styles.payButtonText}>Pay</Text>
-        <FontAwesome name="lock" size={16} color="#FFF" style={styles.lockIcon} />
-      </TouchableOpacity>
+  <Text style={styles.payButtonText}>
+    Pay €{totalAmount !== null ? totalAmount.toFixed(2) : "..."}
+  </Text>
+  <FontAwesome name="lock" size={16} color="#FFF" style={styles.lockIcon} />
+</TouchableOpacity>
+
+
     </View>
   );
 };
 
-// React Native styling (React Native Documentation, 2024)
+// 🔹 Styles
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF',
-    padding: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 24,
-    color: '#333',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#CCC',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
-    backgroundColor: '#F9F9F9',
-  },
-  cardField: {
-    height: 50,
-    marginBottom: 16,
-  },
-  payButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#4A4A8E',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  payButtonText: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginRight: 8,
-  },
-  lockIcon: {
-    marginLeft: 4,
-  },
+  container: { flex: 1, backgroundColor: '#FFF', padding: 20, justifyContent: 'center' },
+  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 24, color: '#333' },
+  label: { fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 8 },
+  input: { borderWidth: 1, borderColor: '#CCC', borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 16, backgroundColor: '#F9F9F9' },
+  cardField: { height: 50, marginBottom: 16 },
+  payButton: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#4A4A8E', paddingVertical: 12, borderRadius: 8, marginTop: 16 },
+  payButtonText: { color: '#FFF', fontSize: 18, fontWeight: 'bold', marginRight: 8 },
+  lockIcon: { marginLeft: 4 },
 });
 
 export default PaymentScreen;
 
-// References:
-// • React Native Documentation (2024). Available at: https://reactnative.dev/docs/components-and-apis
-// • Stripe React Native Documentation (2024). Available at: https://stripe.com/docs/payments/accept-a-payment?platform=react-native
-// • Axios Documentation (2024). Available at: https://axios-http.com/docs/intro
-// • Expo Router Documentation (2024). Available at: https://expo.github.io/router/docs/
-// • Expo Vector Icons Documentation (2024). Available at: https://docs.expo.dev/guides/icons/
-// • ChatGPT (2024). Prompt: How do I implement a payment screen in React Native using Stripe API and handle navigation after successful payment
+
+// 📌 References:
+// • React Native Documentation (2024) - https://reactnative.dev/docs/components-and-apis
+// • Stripe React Native Documentation (2024) - https://stripe.com/docs/payments/accept-a-payment?platform=react-native
+// • Axios Documentation (2024) - https://axios-http.com/docs/intro
+// • Expo Router Documentation (2024) - https://expo.github.io/router/docs/
+// • Expo Vector Icons Documentation (2024) - https://docs.expo.dev/guides/icons/
+// • ChatGPT (2024) - Prompt: "How do I implement a payment screen in React Native using Stripe API and handle navigation after successful payment?"

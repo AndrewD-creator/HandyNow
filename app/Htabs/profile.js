@@ -12,6 +12,8 @@ import { useUser } from "../src/context/UserContext"; // (React Context)
 import { useRouter } from "expo-router"; // (Expo Router)
 
 import axios from "axios";
+import API_URL from "../src/config/apiConfig"; 
+
 
 
 const HandymanProfileScreen = () => {
@@ -22,6 +24,7 @@ const HandymanProfileScreen = () => {
   console.log("User fetched in HandymanProfileScreen:", user);
 
   const [bio, setBio] = useState(""); 
+  const [hourlyRate, setHourlyRate] = useState("");
   const [skills, setSkills] = useState([
     { id: 1, name: "Plumbing", selected: false },
     { id: 2, name: "Electrical", selected: false },
@@ -34,11 +37,13 @@ const HandymanProfileScreen = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(`http://10.0.2.2:3000/users/${user.id}/profile`);
+        const response = await axios.get(`${API_URL}/users/${user.id}/profile`);
         console.log("Fetched profile:", response.data);
 
         setProfile(response.data);
         setBio(response.data.bio); // Pre-fill bio field with fetched bio
+        setHourlyRate(response.data.hourly_rate?.toString() ); // Default to 50 if not set
+
         // Mark selected skills
         const updatedSkills = skills.map((skill) => ({
           ...skill,
@@ -69,15 +74,22 @@ const HandymanProfileScreen = () => {
 // Adapted from (Axios HTTP Requests) & OpenAI (ChatGPT) - Prompt: Make sure the slected skills are being updated
   const saveProfile = async () => {
     const selectedSkills = skills.filter((skill) => skill.selected).map((skill) => skill.name);
+    const formattedRate = parseFloat(hourlyRate);
+
+    if (isNaN(formattedRate) || formattedRate <= 0) {
+      Alert.alert("Invalid Rate", "Please enter a valid hourly rate.");
+      return;
+    }
 
     try {
-      const response = await axios.put(`http://10.0.2.2:3000/users/${user.id}/profile`, {
+      const response = await axios.put(`${API_URL}/users/${user.id}/profile`, {
         bio,
         skills: selectedSkills,
+        hourly_rate: formattedRate,
       });
       console.log("Profile saved:", response.data);
       Alert.alert("Success", "Profile saved successfully!");
-      setProfile({ bio, skills: selectedSkills });
+      setProfile({ bio, skills: selectedSkills, hourly_rate: formattedRate });
 
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -110,6 +122,18 @@ const HandymanProfileScreen = () => {
           value={bio}
           onChangeText={(text) => setBio(text)}
           multiline
+        />
+      </View>
+
+{/* Hourly Rate Section */}
+<View style={styles.section}>
+        <Text style={styles.sectionTitle}>Hourly Rate (€)</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Enter hourly rate"
+          value={hourlyRate}
+          onChangeText={setHourlyRate}
+          keyboardType="numeric"
         />
       </View>
 
@@ -153,6 +177,8 @@ const HandymanProfileScreen = () => {
             ? profile.skills.join(", ")
             : "No skills selected."}
         </Text>
+        <Text style={styles.profileLabel}>Hourly Rate:</Text>
+        <Text style={styles.profileValue}>€{profile.hourly_rate}</Text>
       </View>
 
       {/* Logout Button */}

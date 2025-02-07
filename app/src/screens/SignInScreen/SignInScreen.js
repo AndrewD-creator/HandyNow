@@ -5,6 +5,7 @@ import Logo from '../../../assets/images/HandyNowLogo.png';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 import axios from 'axios';
+import API_URL from "../../config/apiConfig"; 
 import { useUser } from '../../context/UserContext';
 
 const SignInScreen = () => {
@@ -18,7 +19,7 @@ const SignInScreen = () => {
 // (ChatGPT) - Prompt: I want to be able to sign in, but only should work if the name and password are in my database
 const onSignInPressed = async () => {
     try {
-      const response = await axios.post('http://10.0.2.2:3000/login', {
+      const response = await axios.post(`${API_URL}/login`, {
         name: username,
         password: password,
       });

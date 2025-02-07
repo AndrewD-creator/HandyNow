@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios'; // (Axios HTTP Requests)
+import API_URL from "../../config/apiConfig"; 
 import { useUser } from '../../context/UserContext'; // (React Context, 2024)
 
 // (ChatGPT) - Prompt: How to fetch job requests for a handyman and respond with accept or decline
@@ -15,7 +16,7 @@ const JobRequestsScreen = () => {
       try {
         console.log('Fetching job requests for handymanId:', user.id);
 
-        const response = await axios.get(`http://10.0.2.2:3000/bookings/requests/${user.id}`);
+        const response = await axios.get(`${API_URL}/bookings/requests/${user.id}`);
 
         console.log('API Response:', response.data);
 
@@ -39,7 +40,7 @@ const JobRequestsScreen = () => {
   // Function to handle accept or decline actions (ChatGPT - Prompt: How to update job request status via API)
   const handleResponse = async (id, status) => {
     try {
-      const response = await axios.patch(`http://10.0.2.2:3000/bookings/respond/${id}`, { status });
+      const response = await axios.patch(`${API_URL}/bookings/respond/${id}`, { status });
 
       console.log(`Booking ${id} ${status} response:`, response.data);
 
@@ -58,6 +59,8 @@ const JobRequestsScreen = () => {
       <Text style={styles.title}>{item.customerName}</Text>
       <Text style={styles.details}>{`Description: ${item.description}`}</Text>
       <Text style={styles.details}>{`Date: ${new Date(item.date).toLocaleDateString('en-IE')}`}</Text>
+      <Text style={styles.details}>{`Address: ${item.address}, ${item.county}, ${item.eircode}`}</Text>
+
       <View style={styles.actions}>
         <TouchableOpacity
           style={styles.acceptButton}

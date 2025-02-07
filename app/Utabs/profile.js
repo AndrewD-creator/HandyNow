@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useUser } from "../src/context/UserContext";
 import { useRouter } from "expo-router";
 import axios from "axios";
+import API_URL from "../src/config/apiConfig"
+
 
 const profile = () => {
   const { user, setUser } = useUser(); 
@@ -14,7 +16,7 @@ const profile = () => {
     const fetchProfile = async () => {
       try {
         console.log("Fetching profile for user ID:", user.id);
-        const response = await axios.get(`http://10.0.2.2:3000/users/${user.id}`);
+        const response = await axios.get(`${API_URL}/users/${user.id}`);
         console.log("Fetched profile:", response.data);
         setProfile(response.data); // Set profile data
       } catch (error) {

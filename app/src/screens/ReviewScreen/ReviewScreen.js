@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "reac
 import { useRouter } from "expo-router"; // (Expo Router for Navigation, 2024)
 import { useUser } from "../../context/UserContext"; // (React Context, 2024)
 import axios from "axios"; // (Axios HTTP Requests, 2024)
+import API_URL from "../../config/apiConfig"; 
 import { FontAwesome } from "@expo/vector-icons"; // Import star icons (Expo Vector Icons, 2024)
 
 
@@ -36,7 +37,7 @@ const ReviewScreen = () => {
     }
 
     try {
-      const response = await axios.post("http://10.0.2.2:3000/reviews", {
+      const response = await axios.post(`${API_URL}/reviews`, {
         handyman_id: selectedBooking.handyman_id,
         booking_id: selectedBooking.id,
         user_id: user.id, 

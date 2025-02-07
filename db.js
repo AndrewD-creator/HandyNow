@@ -1,5 +1,7 @@
 // (ChatGPT)
 const mysql = require('mysql');
+const util = require('util'); // Import util to promisify db.query
+
 
 const db = mysql.createConnection({
   host: '127.0.0.1',    
@@ -15,5 +17,8 @@ db.connect((err) => {
   }
   console.log('Connected to MySQL database');
 });
+
+db.query = util.promisify(db.query);
+
 
 module.exports = db;

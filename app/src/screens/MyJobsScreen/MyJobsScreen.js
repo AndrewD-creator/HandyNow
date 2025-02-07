@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios'; // (Axios Documentation, 2024)
+import API_URL from "../../config/apiConfig"; 
 import { useUser } from '../../context/UserContext'; // (React Context, 2024)
 
 // (ChatGPT) - Prompt: How do I fetch and display job listings for a logged-in handyman with an option to mark them as complete?
@@ -13,7 +14,7 @@ const MyJobsScreen = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await axios.get(`http://10.0.2.2:3000/bookings/my-jobs/${user.id}`);
+        const response = await axios.get(`${API_URL}/bookings/my-jobs/${user.id}`);
         setJobs(response.data.jobs);
       } catch (error) {
         console.error('Error fetching jobs:', error);
@@ -29,7 +30,7 @@ const MyJobsScreen = () => {
     // Function to handle job completion (ChatGPT, 2024)
   const handleCompleteJob = async (jobId) => {
     try {
-      await axios.patch(`http://10.0.2.2:3000/bookings/mark-complete/${jobId}`);
+      await axios.patch(`${API_URL}/bookings/mark-complete/${jobId}`);
       Alert.alert('Success', 'Job marked as complete, awaiting customer confirmation.');
   
       // Refresh the jobs list
@@ -48,6 +49,8 @@ const MyJobsScreen = () => {
       <Text style={styles.title}>{item.customerName || 'Customer'}</Text>
       <Text style={styles.details}>{`Description: ${item.description}`}</Text>
       <Text style={styles.details}>{`Date: ${new Date(item.date).toLocaleDateString('en-IE')}`}</Text>
+            <Text style={styles.details}>{`Address: ${item.address}, ${item.county}, ${item.eircode}`}</Text>
+      
       <TouchableOpacity
         style={styles.completeButton}
         onPress={() => handleCompleteJob(item.id)}

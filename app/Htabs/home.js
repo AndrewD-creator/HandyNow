@@ -17,7 +17,7 @@ const home = () => {
       >
         <View style={styles.cardContent}>
           <Image
-            source={require('../assets/images/JobRequestsImage.png')} //Handyman Icon generated through AI
+            source={require('../assets/images/JobRequests.png')} //Handyman Icon generated through AI
             style={styles.cardImage}
           />
           <View>
@@ -29,7 +29,7 @@ const home = () => {
         </View>
       </TouchableOpacity>
 
-{/* Navigate to JobRequests */}
+{/* Navigate to MyJobs */}
 <TouchableOpacity
         style={styles.card}
         onPress={() => router.push("../src/screens/MyJobsScreen")}
@@ -42,12 +42,31 @@ const home = () => {
           <View>
             <Text style={styles.cardTitle}>My Jobs</Text>
             <Text style={styles.cardDescription}>
-            View, Accept and Decline your job requests.
+            View and manage your upcoming job bookings in one place.
             </Text>
           </View>
         </View>
       </TouchableOpacity>
       
+      {/* Navigate to MyAvailability */}
+<TouchableOpacity
+        style={styles.card}
+        onPress={() => router.push("../src/screens/AvailabilityScreen")}
+      >
+        <View style={styles.cardContent}>
+          <Image
+            source={require('../assets/images/MyAvailability.png')} //Handyman Icon generated through AI
+            style={styles.cardImage}
+          />
+          <View>
+            <Text style={styles.cardTitle}>My Availability</Text>
+            <Text style={styles.cardDescription}>
+            Manage your availability.
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+
     </View>
   );
 };
