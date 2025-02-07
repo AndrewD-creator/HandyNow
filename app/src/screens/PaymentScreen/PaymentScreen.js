@@ -14,6 +14,7 @@ import API_URL from "../../config/apiConfig";
 import { useRouter } from "expo-router";
 import { useUser } from "../../context/UserContext"; // ✅ Access selected booking
 
+// • ChatGPT (2024) - Prompt: "How do I implement a payment screen in React Native using Stripe API and handle navigation after successful payment?"
 const PaymentScreen = () => {
   const { confirmPayment } = useStripe();
   const router = useRouter();
@@ -168,6 +169,6 @@ export default PaymentScreen;
 // • React Native Documentation (2024) - https://reactnative.dev/docs/components-and-apis
 // • Stripe React Native Documentation (2024) - https://stripe.com/docs/payments/accept-a-payment?platform=react-native
 // • Axios Documentation (2024) - https://axios-http.com/docs/intro
-// • Expo Router Documentation (2024) - https://expo.github.io/router/docs/
+// • Expo Router Documentation (2024) - https://docs.expo.dev/router/introduction/
 // • Expo Vector Icons Documentation (2024) - https://docs.expo.dev/guides/icons/
 // • ChatGPT (2024) - Prompt: "How do I implement a payment screen in React Native using Stripe API and handle navigation after successful payment?"

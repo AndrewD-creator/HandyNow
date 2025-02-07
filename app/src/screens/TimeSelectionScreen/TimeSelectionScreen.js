@@ -5,13 +5,14 @@ import axios from 'axios';
 import API_URL from "../../config/apiConfig"; 
 import { useUser } from '../../context/UserContext';
 
+// ChatGPT - Prompt: "How do I implement a selectable time range for scheduling"
 const timeSlots = [
   '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM',
   '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM',
 ];
 
 const TimeSelectionScreen = () => {
-  const router = useRouter();
+  const router = useRouter(); // (Expo Router, 2024)
   const { day } = useLocalSearchParams();
   const { user } = useUser();
   const handymanId = user?.id;
@@ -78,7 +79,7 @@ const TimeSelectionScreen = () => {
 
   // Mark unavailable (Delete from DB)
   const markUnavailable = async () => {
-    Alert.alert(
+    Alert.alert( // React Native Alert (2024)
       'Confirm',
       `Do you want to mark ${day} as unavailable?`,
       [
@@ -131,6 +132,7 @@ const TimeSelectionScreen = () => {
   );
 };
 
+// (React Native Styling, 2024)
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f9f9f9' },
   title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 16 },
@@ -143,7 +145,7 @@ const styles = StyleSheet.create({
     width: '25%',
     alignItems: 'center',
   },
-  selectedSlot: { backgroundColor: '#007bff' }, // Blue for selected time slots
+  selectedSlot: { backgroundColor: '#007bff' }, 
   timeText: { fontSize: 16, color: '#fff' },
   buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
   saveButton: { backgroundColor: '#28a745', padding: 15, borderRadius: 8, flex: 1, marginRight: 8, alignItems: 'center' },
@@ -153,3 +155,8 @@ const styles = StyleSheet.create({
 });
 
 export default TimeSelectionScreen;
+
+//References
+//OpenAI
+//React Native Alert (2024). Available at: https://reactnative.dev/docs/alert
+//Expo Router (2024). Available at: https://docs.expo.dev/router/introduction/

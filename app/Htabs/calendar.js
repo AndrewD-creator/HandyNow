@@ -5,8 +5,11 @@ import axios from 'axios';
 import API_URL from "../src/config/apiConfig"; 
 import { useUser } from '../src/context/UserContext';
 import { useRouter, useFocusEffect } from 'expo-router';
-import moment from 'moment';
+import moment from 'moment'; //(Moment.js, 2024)
 
+
+
+// Inspired by (Big calendar, 2025) & (ChatGPT - I want to add a calendar screen with React Native Big Calendar)
 const CalendarScreen = () => {
   const { user } = useUser();
   const router = useRouter();
@@ -82,7 +85,6 @@ const CalendarScreen = () => {
       });
 
       // 🔹 Add Confirmed Jobs
-      // 🔹 Add Confirmed Jobs
 confirmedBookings.forEach(({ date, start_time, end_time, customerName, description, address, eircode, county }) => {
   if (!start_time || !end_time) {
     console.warn(`⚠️ Skipping job - Missing time:`, { date, start_time, end_time });
@@ -145,7 +147,7 @@ confirmedBookings.forEach(({ date, start_time, end_time, customerName, descripti
           )
         }
         onPressCell={(date) => {
-          Alert.alert(
+          Alert.alert( //(React Native Alert, 2024)
             'Add Availability',
             `Do you want to add availability?`,
             [
@@ -174,3 +176,8 @@ const styles = StyleSheet.create({
 });
 
 export default CalendarScreen;
+
+//References:
+//Big Calendar (2025), Available at: https://www.npmjs.com/package/react-native-big-calendar
+//React Native Alert (2024). Available at: https://reactnative.dev/docs/alert
+// Moment.js (2024). Available at: https://momentjs.com/

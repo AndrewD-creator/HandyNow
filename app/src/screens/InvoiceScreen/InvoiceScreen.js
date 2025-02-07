@@ -5,29 +5,29 @@ import axios from "axios";
 import API_URL from "../../config/apiConfig";
 
 const InvoiceScreen = () => {
-  const { bookingId } = useLocalSearchParams(); 
+  const { bookingId } = useLocalSearchParams(); // (React Router Params, 2024)
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchInvoice();
-  }, []);
+  }, []); // (React useEffect Hook, 2024)
 
   const fetchInvoice = async () => {
     try {
       console.log(`🔍 Fetching invoice for Booking ID: ${bookingId}`);
-      const response = await axios.get(`${API_URL}/invoices/${bookingId}`);
+      const response = await axios.get(`${API_URL}/invoices/${bookingId}`); // (Axios GET Request, 2024)
       setInvoice(response.data.invoice);
     } catch (error) {
       console.error("❌ Error fetching invoice:", error);
-      Alert.alert("Error", "Failed to load invoice.");
+      Alert.alert("Error", "Failed to load invoice."); // (React Native Alert, 2024)
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#4A4A8E" style={styles.loader} />;
+    return <ActivityIndicator size="large" color="#4A4A8E" style={styles.loader} />; // (React Native ActivityIndicator, 2024)
   }
 
   if (!invoice) {
@@ -42,7 +42,7 @@ const InvoiceScreen = () => {
       <View style={styles.invoiceBox}>
         <Text style={styles.invoiceId}>Invoice ID: {invoice.invoice_id}</Text>
         <Text style={styles.detail}>
-  Issued on: {new Date(invoice.date_issued).toLocaleString("en-IE", {
+  Issued on: {new Date(invoice.date_issued).toLocaleString("en-IE", { // (JavaScript Date Formatting, 2024)
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -67,6 +67,9 @@ const InvoiceScreen = () => {
 };
 
 // 🔹 **Updated Styles**
+// (React Native Styling, 2024) 
+  // ChatGPT - Prompt: "How do I style an invoice UI"
+
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#F9F9F9", alignItems: "center", justifyContent: "center" },
   title: { fontSize: 26, fontWeight: "bold", color: "#333", marginBottom: 20 },
@@ -103,3 +106,14 @@ const styles = StyleSheet.create({
 });
 
 export default InvoiceScreen;
+
+/* Refernces:
+React Hooks (2024). Available at: https://react.dev/reference/react/useState
+Axios HTTP Requests (2024). Available at: https://axios-http.com/docs/intro
+React Router Params (2024). Available at: https://docs.expo.dev/router/reference/url-parameters/
+React Native Alert (2024). Available at: https://reactnative.dev/docs/alert
+React Native ActivityIndicator (2024). Available at: https://reactnative.dev/docs/activityindicator
+React Native Styling (2024). Available at: https://reactnative.dev/docs/style
+JavaScript Date Formatting (2024). Available at: https://www.w3schools.com/jsref/jsref_tolocalestring.asp
+ChatGPT (2024). 
+*/

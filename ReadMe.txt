@@ -23,4 +23,20 @@ Bibliography
 •   Axios Docs Error Handling in Axios (2024), Available at: https://axios-http.com/docs/handling_errors
 •   FontAwesome Star Rating Example (2024). Available at: https://github.com/djchie/react-native-star-rating
 •   Stripe React Native Documentation (2024). Available at: https://stripe.com/docs/payments/accept-a-payment?platform=react-native
+•   Big Calendar (2025), Available at: https://www.npmjs.com/package/react-native-big-calendar
+•   React Native Alert (2024). Available at: https://reactnative.dev/docs/alert
+•   Moment.js (2024). Available at: https://momentjs.com/
+•   React Hooks (2024). Available at: https://react.dev/reference/react/useState
+•   React Native Components (2024). Available at: https://reactnative.dev/docs/components-and-apis
+•   Array find Method (2024). Available at: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
+•   React Router Params (2024). Available at: https://docs.expo.dev/router/reference/url-parameters/
+•   React Native ActivityIndicator (2024). Available at: https://reactnative.dev/docs/activityindicator
+•   JavaScript Date Formatting (2024). Available at: https://www.w3schools.com/jsref/jsref_tolocalestring.asp
+•
+•
+•
+•
+•
+•
+•
 •

@@ -1,15 +1,14 @@
-import * as Notifications from "expo-notifications";
+import * as Notifications from "expo-notifications"; //(Expo Notifications)
 import * as Device from "expo-device";
 import { Alert } from "react-native";
 import API_URL from "../config/apiConfig"; // ✅ Ensure this is correct
 import axios from "axios";
 
+//ChatGPT - How do i ask for permission and save the psuh token in my database
 export const registerForPushNotifications = async (userId) => {
   try {
-    if (!Device.isDevice) {
-      Alert.alert("Push Notifications", "Must use a physical device for push notifications.");
-      return;
-    }
+   
+    
 
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -29,6 +28,7 @@ export const registerForPushNotifications = async (userId) => {
     console.log("📲 Expo Push Token:", token);
 
     // ✅ Save push token to backend
+    // (Axios HTTP Requests, 2024)
     if (userId) {
       await axios.post(`${API_URL}/save-push-token`, { userId, pushToken: token });
       console.log("✅ Push token saved to backend.");
@@ -39,3 +39,9 @@ export const registerForPushNotifications = async (userId) => {
     console.error("❌ Error registering for push notifications:", error);
   }
 };
+
+
+//References:
+// Expo notifications, Available at: https://docs.expo.dev/versions/latest/sdk/notifications/
+//OpenAI
+// Axios HTTP Requests, 2024 Available at: https://axios-http.com/docs/post_example

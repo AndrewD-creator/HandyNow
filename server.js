@@ -4,10 +4,6 @@ const db = require('./db');
 const stripe = require('stripe')('sk_test_51QWg2AFz5vaiQFyZMYgiCpoZLJxsIWiyPor0FTmkcVmE0l9CUEygXpv7nKefiRu1k6GQKMyHD061uSN1tFJ9H50z00Os6Ehbf9'); 
 const moment = require('moment-timezone');
 const { Expo } = require("expo-server-sdk");
-
-
-
-
 const app = express();
 const expo = new Expo();
 
@@ -95,7 +91,7 @@ app.post('/login', (req, res) => {
   });
 });
 
-// ✅ Endpoint to update a user's profile (bio, skills, hourly rate)
+// create an endpoint to update a user's profile (bio, skills, hourly rate)
 app.put('/users/:id/profile', (req, res) => {
   const { id } = req.params;
   let { bio, skills, hourly_rate } = req.body;
@@ -119,7 +115,7 @@ app.put('/users/:id/profile', (req, res) => {
   });
 });
 
-// ✅ Endpoint to fetch user profile details (bio, skills, hourly rate)
+// ChatGPT - create an endpoint to fetch user profile details (bio, skills, hourly rate)
 app.get('/users/:id/profile', (req, res) => {
   const { id } = req.params;
 
@@ -496,6 +492,7 @@ app.patch('/bookings/respond/:id', async (req, res) => {
   }
 });
 
+// ChatGPT - How do i fetch my confimed jobs as a handyman
 app.get('/bookings/my-jobs/:handymanId', async (req, res) => {
   const handymanId = req.params.handymanId;
 
@@ -538,7 +535,7 @@ app.get('/bookings/my-jobs/:handymanId', async (req, res) => {
 });
 
 
-// (ChatGPT) - Prompt: "How do I implement an API endpoint to mark a job as completed and update its status in MySQL?"
+// (ChatGPT) - Prompt: "How do I implement an API endpoint to mark a job as awaiting confimation and update its status in MySQL?"
 app.patch('/bookings/mark-complete/:id', async (req, res) => {
   const bookingId = req.params.id;
 
@@ -675,6 +672,7 @@ app.post('/api/handyman/availability/exception', async (req, res) => {
   }
 });
 
+//ChatGPT - How do i fetch handyman availability 
 app.get('/api/handyman/availability', async (req, res) => {
   const { handyman_id } = req.query;
 
@@ -711,6 +709,7 @@ app.get('/api/handyman/availability', async (req, res) => {
   }
 });
 
+//ChatGPT - how do i update my availability as a handyman
 app.post('/api/handyman/availability/update', async (req, res) => {
   const { handyman_id, recurring, exceptions } = req.body;
 
@@ -757,7 +756,7 @@ app.post('/api/handyman/availability/update', async (req, res) => {
   }
 });
 
-
+//ChatGPT - how do i delete my availability as a handyman
 app.delete('/api/handyman/availability/delete', async (req, res) => {
   const { handyman_id, day_of_week } = req.body;
 
@@ -817,7 +816,7 @@ const generateTimeSlots = (startTime, endTime, bookings, duration = 60) => {
 
 
 
-// 🔹 API Route: Get Available Time Slots
+// ChatGPT - how do i get Available Time Slots
 app.get('/api/handyman/availability/times', async (req, res) => {
   const { handyman_id, date } = req.query;
 
@@ -861,6 +860,7 @@ app.get('/api/handyman/availability/times', async (req, res) => {
   }
 });
 
+//ChatGPT - how do i retrieve invoices for certain bookings
 app.get('/invoices/:bookingId', (req, res) => {
   const { bookingId } = req.params;
 
@@ -895,6 +895,7 @@ app.get('/invoices/:bookingId', (req, res) => {
   });
 });
 
+//ChatGPT - How do i save push notification tokens into my database
 app.post('/save-push-token', async (req, res) => {
   const { userId, pushToken } = req.body;
 
