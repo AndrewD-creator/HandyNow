@@ -3,9 +3,17 @@ const bodyParser = require('body-parser');
 const db = require('./db');
 const stripe = require('stripe')('sk_test_51QWg2AFz5vaiQFyZMYgiCpoZLJxsIWiyPor0FTmkcVmE0l9CUEygXpv7nKefiRu1k6GQKMyHD061uSN1tFJ9H50z00Os6Ehbf9'); 
 const moment = require('moment-timezone');
+const schedule = require("node-schedule"); // ✅ Import node-schedule for background tasks
 const { Expo } = require("expo-server-sdk");
+const multer = require("multer"); // 📌 For handling image uploads
+const path = require("path");
 const app = express();
 const expo = new Expo();
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // ✅ Serve static files
+
+
+const router = express.Router();
 
 const PORT = process.env.PORT || 3000;
 
@@ -63,6 +71,8 @@ app.post('/users', (req, res) => {
 app.post('/login', (req, res) => {
   const { name, password } = req.body;
 
+
+
   console.log('Received login request:', name, password); 
 
   const sql = 'SELECT * FROM users WHERE name = ? AND password = ?';
@@ -81,7 +91,10 @@ app.post('/login', (req, res) => {
 
       if (user.role === 'handyman') {
         return res.status(200).json({ message: 'Login successful', id: user.id, role: 'handyman', fullname: user.fullname });
-      } else {
+      }
+      else if (user.role === 'admin') {
+        return res.status(200).json({ message: 'Login successful', id: user.id, role: 'admin', fullname: user.fullname });
+      }       else {
         return res.status(200).json({ message: 'Login successful', id: user.id, role: 'user', fullname: user.fullname });
       }
     } else {
@@ -233,6 +246,32 @@ const getPushTokensForHandyman = async (handymanId) => {
   });
 };
 
+const sendPushNotification = async (pushToken, title, message) => {
+  if (!Expo.isExpoPushToken(pushToken)) {
+    console.error(`❌ Invalid push token: ${pushToken}`);
+    return;
+  }
+
+  const messages = [
+    {
+      to: pushToken,
+      sound: "default",
+      title: title,
+      body: message,
+      priority: "high", // ✅ Ensures fast delivery
+      data: { extraData: "Some data" },
+    },
+  ];
+
+  try {
+    const response = await expo.sendPushNotificationsAsync(messages);
+    console.log("✅ Push Notification Sent:", response);
+  } catch (error) {
+    console.error("❌ Error sending push notification:", error);
+  }
+};
+
+
 // (ChatGPT) - Prompt: "How do I create an API endpoint to insert bookings into a MySQL database using Node.js and Express?"
 
 
@@ -273,17 +312,14 @@ app.post('/bookings', async (req, res) => {
     const pushTokens = await getPushTokensForHandyman(handymanId);
 
     if (pushTokens.length > 0) {
-      const messages = pushTokens
-        .filter(token => Expo.isExpoPushToken(token))
-        .map(token => ({
-          to: token,
-          sound: "default",
-          title: "New Booking 🚀",
-          body: `You have a new booking request! Check your app for more details.`,
-          data: { bookingId: result.insertId },
-        }));
-
-      await expo.sendPushNotificationsAsync(messages);
+      for (const token of pushTokens) {
+        await sendPushNotification(
+          token,
+          "New Booking 🚀",
+          `You have a new booking request! Check your app for more details.`
+        );
+      }
+    
       console.log("📩 Notifications sent to handyman!");
     }
 
@@ -928,6 +964,305 @@ app.post('/save-push-token', async (req, res) => {
 
 
 
+app.get('/handyman/:id/earnings', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const invoices = await db.query(`
+      SELECT 
+    invoices.id, 
+    invoices.booking_id, 
+    invoices.amount, 
+    invoices.status, 
+    invoices.date_issued, 
+    bookings.date AS booking_date, 
+    users.name AS customer_name
+  FROM invoices
+  JOIN bookings ON invoices.booking_id = bookings.id
+  JOIN users ON bookings.user_id = users.id
+  WHERE invoices.handyman_id = ?
+  ORDER BY invoices.date_issued DESC
+`, [id]);
+
+    const totalEarnings = invoices
+      .filter(inv => inv.status === 'paid')
+      .reduce((sum, inv) => sum + inv.amount, 0); // ✅ Sum paid invoices
+
+    res.json({ invoices, totalEarnings });
+  } catch (error) {
+    console.error("❌ Error fetching earnings:", error);
+    res.status(500).json({ error: "Failed to fetch earnings." });
+  }
+});
+
+// Function to send push notification
+
+
+// 🔹 Run this every 30 minutes to check for upcoming bookings
+schedule.scheduleJob("*/30 * * * *", async () => {  
+  try {
+    console.log("🔍 Checking for upcoming bookings (1-day reminder)...");
+
+    const now = moment().tz("Europe/Dublin"); 
+    const oneDayLater = now.clone().add(24, "hours").format("YYYY-MM-DD HH:mm:ss");
+
+    const sql = `
+      SELECT b.id, b.user_id, b.handyman_id, b.date, b.start_time, pt.push_token, 
+             h.fullname AS handyman_name, b.notifications_sent
+      FROM bookings b
+      JOIN push_tokens pt ON b.user_id = pt.user_id
+      JOIN users h ON b.handyman_id = h.id
+      WHERE 
+        CONCAT(b.date, ' ', b.start_time) BETWEEN ? AND ?
+        AND (b.notifications_sent IS NULL OR NOT FIND_IN_SET('tomorrow_sent', b.notifications_sent));
+    `;
+
+    const upcomingBookings = await db.query(sql, [
+      now.format("YYYY-MM-DD HH:mm:ss"), oneDayLater
+    ]);
+
+    if (upcomingBookings.length === 0) {
+      console.log("✅ No new notifications needed.");
+      return;
+    }
+
+    for (const booking of upcomingBookings) {
+      if (!booking.push_token) {
+        console.warn(`⚠️ User ${booking.user_id} has no push token. Skipping notification.`);
+        continue;
+      }
+
+      const message = `📢 Reminder: You have a booking with ${booking.handyman_name} tomorrow at ${booking.start_time}.`;
+
+      console.log(`📲 Sending notification to User ${booking.user_id}: "${message}"`);
+      await sendPushNotification(booking.push_token, "Upcoming Booking Reminder", message);
+
+      // ✅ Update `notifications_sent` column to prevent duplicate notifications
+      await db.query(`
+        UPDATE bookings 
+        SET notifications_sent = IF(
+          FIND_IN_SET('tomorrow_sent', IFNULL(notifications_sent, '')), 
+          notifications_sent, 
+          CONCAT_WS(',', IFNULL(notifications_sent, ''), 'tomorrow_sent')
+        ) 
+        WHERE id = ?
+      `, [booking.id]);
+    }
+  } catch (error) {
+    console.error("❌ Error checking upcoming bookings:", error);
+  }
+});
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/dispute_images/"); // Save images in our created folder
+  },
+  filename: (req, file, cb) => {
+    cb(null, `dispute_${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+
+// ✅ File Upload Middleware
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB Max Size
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png/;
+    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = fileTypes.test(file.mimetype);
+
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      return cb(new Error("Only JPEG, JPG, and PNG files are allowed!"));
+    }
+  },
+});
+
+// 📌 API Endpoint: File a Dispute
+app.post("/disputes", upload.array("images", 5), async (req, res) => {
+  const { booking_id, user_id, handyman_id, reason, description } = req.body;
+  
+  if (!booking_id || !user_id || !handyman_id || !reason) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    // 📌 Store image file paths in JSON format
+    const imagePaths = req.files.map(file => `/uploads/dispute_images/${file.filename}`);
+
+    const sql = `
+      INSERT INTO disputes (booking_id, user_id, handyman_id, reason, description, images)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    await db.query(sql, [booking_id, user_id, handyman_id, reason, description, JSON.stringify(imagePaths)]);
+
+    res.status(201).json({ message: "Dispute filed successfully!" });
+  } catch (error) {
+    console.error("❌ Error filing dispute:", error);
+    res.status(500).json({ error: "Failed to submit dispute." });
+  }
+});
+
+app.get("/handyman/:handymanId/disputes", async (req, res) => {
+  try {
+    const { handymanId } = req.params;
+
+    const sql = `
+      SELECT d.dispute_id, d.booking_id, d.user_id, d.reason, d.description, d.images, d.status, 
+             u.name AS customer_name, b.date AS booking_date 
+      FROM disputes d
+      JOIN bookings b ON d.booking_id = b.id
+      JOIN users u ON d.user_id = u.id
+      WHERE b.handyman_id = ?
+      AND d.status = 'Pending Handyman'
+      ORDER BY d.status = 'Pending Handyman' DESC, d.dispute_id DESC;
+    `;
+
+    const disputes = await db.query(sql, [handymanId]);
+
+    // ✅ Log Raw Data Before Parsing
+    console.log("📩 RAW DISPUTE DATA FROM DB:", disputes);
+
+    // ✅ Ensure `images` is parsed correctly
+    disputes.forEach((dispute) => {
+      if (typeof dispute.images === "string") {
+        try {
+          dispute.images = JSON.parse(dispute.images);
+          if (!Array.isArray(dispute.images)) {
+            dispute.images = [];
+          }
+        } catch (error) {
+          console.warn(`⚠️ Error parsing images for dispute ${dispute.dispute_id}:`, error);
+          dispute.images = []; // Prevent crash
+        }
+      } else {
+        dispute.images = []; // Ensure it's always an array
+      }
+    });
+
+    console.log("📩 FORMATTED DISPUTE DATA:", disputes);
+    res.status(200).json({ disputes });
+  } catch (error) {
+    console.error("❌ Error fetching disputes:", error);
+    res.status(500).json({ error: "Failed to fetch disputes." });
+  }
+});
+
+
+
+
+app.patch("/handyman/respond-dispute", async (req, res) => {
+  try {
+    const { disputeId, handymanId, response, resolutionDetails } = req.body;
+
+    if (!disputeId || !handymanId || !response) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+
+    let statusUpdate;
+    if (response === "accepted") {
+      statusUpdate = "Resolved - Refunded"; // ✅ Matches ENUM
+    } else if (response === "rejected") {
+      if (!resolutionDetails) {
+        return res.status(400).json({ error: "Rejection must include details." });
+      }
+      statusUpdate = "Pending Admin"; // ✅ Escalate to admin
+    } else {
+      return res.status(400).json({ error: "Invalid response type." });
+    }
+
+    const sql = `
+      UPDATE disputes 
+      SET status = ?, handyman_response = ?, updated_at = NOW() 
+      WHERE dispute_id = ? AND handyman_id = ?
+    `;
+
+    const result = await db.query(sql, [statusUpdate, resolutionDetails || "", disputeId, handymanId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Dispute not found or already processed." });
+    }
+
+    res.status(200).json({ message: `Dispute marked as '${statusUpdate}'.` });
+  } catch (error) {
+    console.error("❌ Error responding to dispute:", error);
+    res.status(500).json({ error: "Failed to process dispute response." });
+  }
+});
+
+// ✅ Get All Disputes Pending Admin Review
+app.get("/admin/disputes", async (req, res) => {
+  try {
+    const sql = `
+      SELECT d.dispute_id, d.booking_id, d.user_id, d.handyman_id, d.reason, 
+             d.description, d.images, d.status, d.handyman_response, 
+             u.name AS customer_name, h.fullname AS handyman_name, 
+             b.date AS booking_date
+      FROM disputes d
+      JOIN bookings b ON d.booking_id = b.id
+      JOIN users u ON d.user_id = u.id
+      JOIN users h ON d.handyman_id = h.id
+      WHERE d.status = 'Pending Admin'
+      ORDER BY d.dispute_id DESC;
+    `;
+
+    const disputes = await db.query(sql);
+
+    // ✅ Convert images JSON string into an array
+    disputes.forEach((dispute) => {
+      try {
+        dispute.images = dispute.images ? JSON.parse(dispute.images) : [];
+      } catch (error) {
+        console.warn(`⚠️ Error parsing images for dispute ${dispute.dispute_id}:`, error);
+        dispute.images = [];
+      }
+    });
+
+    res.status(200).json({ disputes });
+  } catch (error) {
+    console.error("❌ Error fetching admin disputes:", error);
+    res.status(500).json({ error: "Failed to fetch admin disputes." });
+  }
+});
+
+// ✅ Admin Resolves Dispute (Approve Refund or Reject)
+app.patch("/admin/resolve-dispute", async (req, res) => {
+  try {
+    const { disputeId, adminDecision, adminNote } = req.body;
+
+    if (!disputeId || !adminDecision) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+
+    let statusUpdate;
+    if (adminDecision === "approved") {
+      statusUpdate = "Resolved - Refunded"; // ✅ Approve refund
+    } else if (adminDecision === "rejected") {
+      statusUpdate = "Resolved - Rejected"; // ❌ Deny refund
+    } else {
+      return res.status(400).json({ error: "Invalid decision type." });
+    }
+
+    const sql = `
+      UPDATE disputes 
+      SET status = ?, admin_response = ?, updated_at = NOW() 
+      WHERE dispute_id = ?
+    `;
+
+    const result = await db.query(sql, [statusUpdate, adminNote || "", disputeId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Dispute not found or already processed." });
+    }
+
+    res.status(200).json({ message: `Dispute marked as '${statusUpdate}'.` });
+  } catch (error) {
+    console.error("❌ Error resolving dispute:", error);
+    res.status(500).json({ error: "Failed to process dispute resolution." });
+  }
+});
 
 
 // Start the server

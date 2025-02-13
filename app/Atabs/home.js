@@ -8,12 +8,12 @@ const home = () => {
   // (inspired by card component & react native styling)
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🔨 HandyNow</Text>
+      <Text style={styles.title}>Admin</Text>
 
       {/* Navigate to Search Handymen */}
       <TouchableOpacity
         style={styles.card}
-        onPress={() => router.push("../src/screens/SearchHandymanScreen")}
+        onPress={() => router.push("../src/screens/AdminDisputeScreen")}
       >
         <View style={styles.cardContent}>
           <Image
@@ -21,9 +21,8 @@ const home = () => {
             style={styles.cardImage}
           />
           <View>
-            <Text style={styles.cardTitle}>Find Handymen</Text>
+            <Text style={styles.cardTitle}>Disputes</Text>
             <Text style={styles.cardDescription}>
-              Search for available handymen in your area and get the help you need.
             </Text>
           </View>
         </View>
@@ -31,24 +30,6 @@ const home = () => {
 
       
 
-       {/* Navigate to UserBookings */}
-       <TouchableOpacity
-        style={styles.card}
-        onPress={() => router.push("../src/screens/UserBookingsScreen")}
-      >
-        <View style={styles.cardContent}>
-          <Image
-            source={require('../assets/images/MyBookings.png')} //Handyman Icon generated through AI
-            style={styles.cardImage}
-          />
-          <View>
-            <Text style={styles.cardTitle}>My Bookings</Text>
-            <Text style={styles.cardDescription}>
-            Easily view and manage your scheduled bookings.
-            </Text>
-          </View>
-        </View>
-      </TouchableOpacity>
       
     </View>
 

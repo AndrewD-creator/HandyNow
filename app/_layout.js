@@ -57,6 +57,8 @@ export default function RootLayout() {
       >
         <Stack.Screen name="Utabs" options={{ headerShown: false }} />
         <Stack.Screen name="Htabs" options={{ headerShown: false }} />
+        <Stack.Screen name="Atabs" options={{ headerShown: false }} />
+
       </Stack>
       </UserProvider>
     </ThemeProvider>

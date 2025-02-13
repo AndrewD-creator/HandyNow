@@ -1,15 +1,20 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
 import { useRouter } from "expo-router"; //(Expo Router for Navigation, 2024)
+import { useUser } from "../src/context/UserContext"; 
 
 const home = () => {
   const router = useRouter();
+  const { user } = useUser(); // ✅ Get logged-in handyman info
+
 
   // Inspired by Card Component
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>handyman home</Text>
-    
+    <ScrollView style={styles.container}>
+<View style={styles.header}>
+        
+        <Text style={styles.title}>Welcome, {user?.fullname || "Handyman"}! 👋</Text>
+      </View>    
      {/* Navigate to JobRequests */}
      <TouchableOpacity
         style={styles.card}
@@ -67,7 +72,25 @@ const home = () => {
         </View>
       </TouchableOpacity>
 
-    </View>
+  {/* Navigate to Disputes */}
+  <TouchableOpacity
+        style={styles.card}
+        onPress={() => router.push("../src/screens/HandymanDisputeScreen")}
+      >
+        <View style={styles.cardContent}>
+          <Image
+            source={require('../assets/images/MyAvailability.png')} //Handyman Icon generated through AI
+            style={styles.cardImage}
+          />
+          <View>
+            <Text style={styles.cardTitle}>Disputes</Text>
+            <Text style={styles.cardDescription}>
+            Look at any job disputes.
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 
@@ -82,27 +105,28 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
     marginBottom: 16,
-    marginTop: 60,
+    marginTop: 40,
   },
   card: {
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 16,
-    padding: 20,
+    padding: 14,
     marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 3,
+    
   },
   cardContent: {
     flexDirection: "row",
-    marginLeft: -10, 
+    marginLeft: 0, 
   },
   cardImage: {
     width: 100,

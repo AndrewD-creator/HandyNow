@@ -18,6 +18,9 @@ const SignInScreen = () => {
 
 // (ChatGPT) - Prompt: I want to be able to sign in, but only should work if the name and password are in my database
 const onSignInPressed = async () => {
+
+
+
     try {
       const response = await axios.post(`${API_URL}/login`, {
         name: username,
@@ -38,7 +41,10 @@ const onSignInPressed = async () => {
   
         if (response.data.role === 'handyman') {
           router.push('Htabs/home');
-        } else {
+        } else if (response.data.role === 'admin') {
+          router.push('Atabs/home');
+        } 
+        else {
           router.push('Utabs/home');
         }
       }
@@ -97,7 +103,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: '70%',
+    width: '80%',
     maxWidth: 300,
     maxHeight: 400,
   },

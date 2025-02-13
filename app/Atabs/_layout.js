@@ -1,4 +1,4 @@
-// Adapted from Simon Grimm (2023)
+//Adapted from Simon Grimm (2023) 
 import { Tabs } from "expo-router";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
@@ -10,10 +10,6 @@ export default function TabsLayout() {
                     let iconName;
                     if (route.name === "home") {
                         iconName = "home-outline";
-                    } else if (route.name === "calendar") {
-                        iconName = "calendar-outline"; 
-                    } else if (route.name === "earnings") {
-                        iconName = "wallet-outline";
                     } else if (route.name === "profile") {
                         iconName = "person-outline";
                     }
@@ -21,25 +17,13 @@ export default function TabsLayout() {
                 },
                 tabBarActiveTintColor: "tomato",
                 tabBarInactiveTintColor: "gray",
-                headerShown: false, // Removes global header
+                headerShown: false, 
             })}
         >
             <Tabs.Screen
                 name="home"
                 options={{
                     tabBarLabel: "Home",
-                }}
-            />
-            <Tabs.Screen
-                name="calendar"
-                options={{
-                    tabBarLabel: "Calendar",
-                }}
-            />
-            <Tabs.Screen
-                name="earnings"
-                options={{
-                    tabBarLabel: "Earnings",
                 }}
             />
             <Tabs.Screen

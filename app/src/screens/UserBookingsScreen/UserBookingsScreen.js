@@ -4,6 +4,7 @@ import axios from 'axios'; // (Axios, 2024)
 import API_URL from "../../config/apiConfig"; 
 import { useUser } from '../../context/UserContext'; // (React Context, 2024)
 import { useRouter } from 'expo-router'; // (Expo Router, 2024)
+import moment from 'moment'; //(Moment.js, 2024)
 
 
 const UserBookingsScreen = () => {
@@ -122,8 +123,21 @@ const UserBookingsScreen = () => {
     });
   };
 
+  // Calculate if the dispute button should be shown
+const canRaiseDispute = (completionDate, disputeExists) => {
+  if (disputeExists) return false; // Already disputed
+
+  const completionMoment = moment(completionDate);
+  const fiveDaysLater = completionMoment.add(5, "days");
+  return moment().isBefore(fiveDaysLater); // Only allow within 5 days
+};
+
   // Render individual booking card
-  const renderBookingItem = ({ item }) => (
+  const renderBookingItem = ({ item }) => {
+    const disputeAllowed = canRaiseDispute(item.date_completed, item.hasDispute); // Check if allowed
+  
+    return (
+
     <View style={styles.card}>
       <Text style={styles.date}>{`Date: ${formatDate(item.date)}`}</Text>
       <Text style={styles.handyman}>{`Handyman: ${item.handymanName || 'N/A'}`}</Text>
@@ -182,9 +196,25 @@ const UserBookingsScreen = () => {
         <Text style={styles.invoiceButtonText}>View Invoice</Text>
       </TouchableOpacity>
           )}
+
+           {/* 🔹 Raise Dispute Button (Only for completed bookings within 5 days) */}
+      {item.status === "completed" && disputeAllowed && (
+        <TouchableOpacity
+          style={styles.disputeButton}
+          onPress={() => {
+            router.push({
+              pathname: "src/screens/UserDisputeScreen",
+              params: { bookingId: item.id, handymanName: item.handymanName, handyman_id: item.handyman_id },
+            });
+          }}
+        >
+          <Text style={styles.disputeButtonText}>Raise Dispute</Text>
+        </TouchableOpacity>
+         )}
     </View>
   );
   
+  };
 
   // Function to determine dynamic color for status
   const getStatusStyle = (status) => {
@@ -353,7 +383,7 @@ const styles = StyleSheet.create({
   reviewButton: {
     marginTop: 10,
     backgroundColor: "#ff9900", // Bright orange color
-    padding: 12,
+    padding: 10,
     borderRadius: 8,
     alignItems: "center",
     elevation: 3, // Adds a shadow for Android
@@ -370,7 +400,7 @@ const styles = StyleSheet.create({
   invoiceButton: {
     marginTop: 10,
     backgroundColor: "#34dbeb", // Bright orange color
-    padding: 12,
+    padding: 10,
     borderRadius: 8,
     alignItems: "center",
     elevation: 3, // Adds a shadow for Android
@@ -380,6 +410,23 @@ const styles = StyleSheet.create({
   },
   invoiceButtonText: {
     color: "#fff", // White text
+    fontSize: 16,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+  disputeButton: {
+    marginTop: 10,
+    backgroundColor: "#645853", // Red color for disputes
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  disputeButtonText: {
+    color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
     textTransform: "uppercase",

@@ -184,4 +184,34 @@ ALTER TABLE push_tokens
 DROP INDEX push_token, 
 ADD UNIQUE KEY unique_entry (user_id, push_token);
 
-DROP TABLE IF EXISTS push_tokens;
+
+ALTER TABLE bookings ADD COLUMN notifications_sent VARCHAR(255) DEFAULT '';
+
+CREATE TABLE disputes (
+    dispute_id INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id INT NOT NULL,
+    user_id INT NOT NULL,
+    handyman_id INT NOT NULL,
+    reason VARCHAR(255) NOT NULL,
+    description TEXT,
+    images JSON DEFAULT NULL, -- Stores image URLs as JSON array
+    status ENUM('Pending Handyman', 'Pending Admin', 'Resolved - Refunded', 'Resolved - Rejected') DEFAULT 'Pending Handyman',
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (handyman_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+ALTER TABLE disputes ADD COLUMN handyman_response TEXT DEFAULT NULL;
+
+SELECT dispute_id, images FROM disputes WHERE images IS NOT NULL;
+
+ALTER TABLE disputes ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+ALTER TABLE users MODIFY COLUMN role ENUM('user', 'handyman', 'admin') NOT NULL DEFAULT 'user';
+
+INSERT INTO users (id, name, email, password, role) 
+VALUES (37, 'admin', 'admin@example.com', 'admin', 'admin');
+
+
+ALTER TABLE disputes ADD COLUMN admin_response TEXT DEFAULT NULL;
