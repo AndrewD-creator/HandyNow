@@ -32,11 +32,11 @@ Bibliography
 •   React Router Params (2024). Available at: https://docs.expo.dev/router/reference/url-parameters/
 •   React Native ActivityIndicator (2024). Available at: https://reactnative.dev/docs/activityindicator
 •   JavaScript Date Formatting (2024). Available at: https://www.w3schools.com/jsref/jsref_tolocalestring.asp
-•
-•
-•
-•
-•
-•
+•   Axios. (2024). Available at: https://rapidapi.com/guides/axios-async-await
+•   React. (2024). Available at: https://reactjs.org/docs/hooks-overview.html
+•   React Native Image. (2024). Available at: https://reactnative.dev/docs/image 
+•   React Native Modal. (2024). Available at: https://reactnative.dev/docs/modal
+•   Expo ImagePicker. (2024). Available at: https://docs.expo.dev/versions/latest/sdk/imagepicker/
+•   React Native TouchableOpacity. (2024). Available at: https://reactnative.dev/docs/touchableopacity
 •
 •

@@ -963,7 +963,7 @@ app.post('/save-push-token', async (req, res) => {
 });
 
 
-
+//ChatGPT - How do I retrieve a handyman's total earnings and list their invoices
 app.get('/handyman/:id/earnings', async (req, res) => {
   const { id } = req.params;
 
@@ -995,10 +995,8 @@ app.get('/handyman/:id/earnings', async (req, res) => {
   }
 });
 
-// Function to send push notification
 
-
-// 🔹 Run this every 30 minutes to check for upcoming bookings
+//ChatGPT - How can I schedule a job to check for upcoming bookings, in the next 24hours, every 30 mins and send push notifications
 schedule.scheduleJob("*/30 * * * *", async () => {  
   try {
     console.log("🔍 Checking for upcoming bookings (1-day reminder)...");
@@ -1037,7 +1035,7 @@ schedule.scheduleJob("*/30 * * * *", async () => {
       console.log(`📲 Sending notification to User ${booking.user_id}: "${message}"`);
       await sendPushNotification(booking.push_token, "Upcoming Booking Reminder", message);
 
-      // ✅ Update `notifications_sent` column to prevent duplicate notifications
+      // Update `notifications_sent` column to prevent duplicate notifications
       await db.query(`
         UPDATE bookings 
         SET notifications_sent = IF(
@@ -1053,6 +1051,7 @@ schedule.scheduleJob("*/30 * * * *", async () => {
   }
 });
 
+//ChatGPT - "How can I implement a file upload using Multer, ensuring only images (JPEG, JPG, PNG) are allowed?"
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/dispute_images/"); // Save images in our created folder
@@ -1062,7 +1061,7 @@ const storage = multer.diskStorage({
   },
 });
 
-// ✅ File Upload Middleware
+
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB Max Size
@@ -1079,7 +1078,7 @@ const upload = multer({
   },
 });
 
-// 📌 API Endpoint: File a Dispute
+// ChatGPT - How can I create an API endpoint that allows users to file a dispute with image evidence
 app.post("/disputes", upload.array("images", 5), async (req, res) => {
   const { booking_id, user_id, handyman_id, reason, description } = req.body;
   
@@ -1105,6 +1104,7 @@ app.post("/disputes", upload.array("images", 5), async (req, res) => {
   }
 });
 
+//ChatGPT - How can I retrieve all pending disputes for a handyman
 app.get("/handyman/:handymanId/disputes", async (req, res) => {
   try {
     const { handymanId } = req.params;
@@ -1152,7 +1152,7 @@ app.get("/handyman/:handymanId/disputes", async (req, res) => {
 
 
 
-
+//ChatGPT - How can a handyman accept or reject a dispute, and how should I update the database 
 app.patch("/handyman/respond-dispute", async (req, res) => {
   try {
     const { disputeId, handymanId, response, resolutionDetails } = req.body;
@@ -1192,7 +1192,7 @@ app.patch("/handyman/respond-dispute", async (req, res) => {
   }
 });
 
-// ✅ Get All Disputes Pending Admin Review
+//ChatGPT - How can I retrieve all disputes pending admin review with images included
 app.get("/admin/disputes", async (req, res) => {
   try {
     const sql = `
@@ -1227,7 +1227,7 @@ app.get("/admin/disputes", async (req, res) => {
   }
 });
 
-// ✅ Admin Resolves Dispute (Approve Refund or Reject)
+// ChatGPT - How can an admin approve or reject a dispute and update the status in the database
 app.patch("/admin/resolve-dispute", async (req, res) => {
   try {
     const { disputeId, adminDecision, adminNote } = req.body;

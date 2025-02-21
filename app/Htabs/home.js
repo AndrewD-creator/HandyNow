@@ -79,7 +79,7 @@ const home = () => {
       >
         <View style={styles.cardContent}>
           <Image
-            source={require('../assets/images/MyAvailability.png')} //Handyman Icon generated through AI
+            source={require('../assets/images/Dispute.png')} //Handyman Icon generated through AI
             style={styles.cardImage}
           />
           <View>

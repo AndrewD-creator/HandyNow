@@ -10,15 +10,16 @@ import {
   TextInput,
    Modal,
 } from "react-native";
-import axios from "axios";
+import axios from "axios"; // (Axios, 2024)
 import API_URL from "../../config/apiConfig";
-import { useUser } from "../../context/UserContext"; 
-import { useRouter } from "expo-router"; 
+import { useUser } from "../../context/UserContext";  // (React Context, 2024)
+import { useRouter } from "expo-router";  // (Expo Router, 2024)
+
 
 const HandymanDisputeScreen = () => {
   const { user } = useUser();
   const router = useRouter();
-  const [disputes, setDisputes] = useState([]);
+  const [disputes, setDisputes] = useState([]); // (React, 2024)
   const [loading, setLoading] = useState(true);
   const [rejectComments, setRejectComments] = useState({});
   const [selectedImage, setSelectedImage] = useState(null); // ✅ Store the selected image
@@ -28,16 +29,16 @@ const HandymanDisputeScreen = () => {
     fetchDisputes();
   }, []);
 
-  // 🔹 Fetch Disputes for Handyman
+  //  Fetch Disputes for Handyman
   const fetchDisputes = async () => {
     try {
-      const response = await axios.get(`${API_URL}/handyman/${user.id}/disputes`);
+      const response = await axios.get(`${API_URL}/handyman/${user.id}/disputes`); // (Axios, 2024)
   
       console.log("📩 RAW API RESPONSE FROM SERVER:", response.data);
   
       const formattedDisputes = response.data.disputes.map((dispute) => ({
         ...dispute,
-        images: Array.isArray(dispute.images) ? dispute.images : [], // ✅ Ensure images is an array
+        images: Array.isArray(dispute.images) ? dispute.images : [], //  Ensure images is an array
       }));
 
       setDisputes(formattedDisputes);
@@ -49,23 +50,23 @@ const HandymanDisputeScreen = () => {
     }
   };
 
-  // ✅ Format Date to Irish Format (DD/MM/YYYY)
+  //  Format Date to Irish Format (DD/MM/YYYY)
   const formatDate = (isoDate) => {
     if (!isoDate) return "Invalid Date";
-    return isoDate.split("T")[0].split("-").reverse().join("/"); // ✅ Converts YYYY-MM-DD → DD/MM/YYYY
+    return isoDate.split("T")[0].split("-").reverse().join("/"); //  Converts YYYY-MM-DD → DD/MM/YYYY
   };
 
-    // ✅ Handle Image Click to Show Fullscreen Modal
+    //  Handle Image Click to Show Fullscreen Modal
     const handleImagePress = (imageUrl) => {
         setSelectedImage(imageUrl);
       };
     
-      // ✅ Close Image Modal
+      //  Close Image Modal
       const closeImageModal = () => {
         setSelectedImage(null);
       };
 
-  // ✅ Accept Dispute (Refund Customer)
+  //  Accept Dispute (Refund Customer)
   const handleAcceptDispute = async (disputeId) => {
     Alert.alert(
       "Confirm Acceptance",
@@ -76,7 +77,7 @@ const HandymanDisputeScreen = () => {
           text: "Accept",
           onPress: async () => {
             try {
-              await axios.patch(`${API_URL}/handyman/respond-dispute`, {
+              await axios.patch(`${API_URL}/handyman/respond-dispute`, { // (Axios, 2024)
                 disputeId,
                 handymanId: user.id,
                 response: "accepted",
@@ -93,7 +94,7 @@ const HandymanDisputeScreen = () => {
     );
   };
 
-  // ❌ Reject Dispute (Escalate to Admin)
+  //  Reject Dispute (Escalate to Admin)
   const handleRejectDispute = async (disputeId) => {
     if (!rejectComments[disputeId]) {
       Alert.alert("Error", "Please provide a comment before rejecting.");
@@ -101,7 +102,7 @@ const HandymanDisputeScreen = () => {
     }
 
     try {
-      await axios.patch(`${API_URL}/handyman/respond-dispute`, {
+      await axios.patch(`${API_URL}/handyman/respond-dispute`, { // (Axios, 2024)
         disputeId,
         handymanId: user.id,
         response: "rejected",
@@ -116,7 +117,7 @@ const HandymanDisputeScreen = () => {
     }
   };
 
-  // 🔹 Render Dispute Item
+  //  Render Dispute Item
   const renderDisputeItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.customerName}>Customer: {item.customer_name}</Text>
@@ -124,7 +125,7 @@ const HandymanDisputeScreen = () => {
       <Text style={styles.reason}>Reason: {item.reason}</Text>
       <Text style={styles.description}>{item.description}</Text>
 
-      {/* Show Images if uploaded */}
+      {/* Show Images if uploaded (Inspired by React Native Image and ChatGPT) */}
       {item.images && item.images.length > 0 && (
   <View style={styles.imageContainer}>
     {item.images.map((imagePath, index) => {
@@ -160,7 +161,7 @@ const HandymanDisputeScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Reject Comment Input */}
+      {/* Reject Comment Input (React Native TextInput, 2024) */}
       <TextInput
         style={styles.input}
         placeholder="Provide reason for rejection..."
@@ -186,7 +187,7 @@ const HandymanDisputeScreen = () => {
         <Text style={styles.noDisputesText}>No active disputes.</Text>
       )}
 
-      {/* ✅ Fullscreen Image Preview Modal */}
+      {/* Fullscreen Image Preview Modal (React Native Image, Modal, 2024) */}
       <Modal visible={!!selectedImage} transparent={true} animationType="fade">
         <View style={styles.modalBackground}>
           <TouchableOpacity style={styles.modalClose} onPress={closeImageModal}>
@@ -199,7 +200,7 @@ const HandymanDisputeScreen = () => {
   );
 };
 
-// 🔹 Styles
+// Styles (React Stylesheet, 2024)
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
   title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 16, color: "#333" },
@@ -241,3 +242,13 @@ const styles = StyleSheet.create({
 });
 
 export default HandymanDisputeScreen;
+
+// References:
+// - Axios. (2024). Available at: https://rapidapi.com/guides/axios-async-await
+// - Expo Router. (2024). Available at: https://docs.expo.dev/router/introduction/
+// - React. (2024). Available at: https://reactjs.org/docs/hooks-overview.html
+// - React Context. (2024). Available at: https://reactjs.org/docs/context.html
+// - React Native Image. (2024). Available at: https://reactnative.dev/docs/image
+// - React Native Modal. (2024). Available at: https://reactnative.dev/docs/modal
+// - React Native TextInput. (2024). Available at: https://reactnative.dev/docs/textinput
+// - React Stylesheet. (2024). Available at: https://reactnative.dev/docs/stylesheet

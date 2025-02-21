@@ -11,26 +11,26 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
-import axios from "axios";
+import axios from "axios"; // (Axios, 2024)
 import API_URL from "../../config/apiConfig";
-import { useRouter } from "expo-router";
+import { useRouter } from "expo-router"; // (Expo Router, 2024)
 
 const AdminDisputeScreen = () => {
   const router = useRouter();
-  const [disputes, setDisputes] = useState([]);
+  const [disputes, setDisputes] = useState([]); // (React, 2024)
   const [loading, setLoading] = useState(true);
   const [adminNotes, setAdminNotes] = useState({});
-    const [selectedImage, setSelectedImage] = useState(null); // ✅ Store the selected image
+    const [selectedImage, setSelectedImage] = useState(null); //  Store the selected image
   
 
   useEffect(() => {
     fetchDisputes();
   }, []);
 
-  // ✅ Fetch Disputes Pending Admin Review
+  //Fetch Disputes Pending Admin Review
   const fetchDisputes = async () => {
     try {
-      const response = await axios.get(`${API_URL}/admin/disputes`);
+      const response = await axios.get(`${API_URL}/admin/disputes`); // (Axios, 2024)
       setDisputes(response.data.disputes);
     } catch (error) {
       console.error("❌ Error fetching disputes:", error);
@@ -40,26 +40,26 @@ const AdminDisputeScreen = () => {
     }
   };
 
-  // ✅ Format Date (DD/MM/YYYY)
+  //  Format Date (DD/MM/YYYY)
   const formatDate = (isoDate) => {
     if (!isoDate) return "Invalid Date";
     return isoDate.split("T")[0].split("-").reverse().join("/");
   };
 
-   // ✅ Handle Image Click to Show Fullscreen Modal
+   // ✅Handle Image Click to Show Fullscreen Modal
    const handleImagePress = (imageUrl) => {
     setSelectedImage(imageUrl);
   };
 
-  // ✅ Close Image Modal
+  //  Close Image Modal
   const closeImageModal = () => {
     setSelectedImage(null);
   };
 
-  // ✅ Admin Approves Refund
+  //  Admin Approves Refund
   const handleApprove = async (disputeId) => {
     try {
-      await axios.patch(`${API_URL}/admin/resolve-dispute`, {
+      await axios.patch(`${API_URL}/admin/resolve-dispute`, { // (Axios, 2024)
         disputeId,
         adminDecision: "approved",
         adminNote: adminNotes[disputeId] || "",
@@ -72,7 +72,7 @@ const AdminDisputeScreen = () => {
     }
   };
 
-  // ❌ Admin Rejects Refund
+  //  Admin Rejects Refund
   const handleReject = async (disputeId) => {
     if (!adminNotes[disputeId]) {
       Alert.alert("Error", "Please provide a reason for rejection.");
@@ -80,7 +80,7 @@ const AdminDisputeScreen = () => {
     }
 
     try {
-      await axios.patch(`${API_URL}/admin/resolve-dispute`, {
+      await axios.patch(`${API_URL}/admin/resolve-dispute`, { // (Axios, 2024)
         disputeId,
         adminDecision: "rejected",
         adminNote: adminNotes[disputeId],
@@ -115,7 +115,7 @@ const AdminDisputeScreen = () => {
         </Text>
       </View>
 
-    {/* Shows Images */}
+    {/* Shows Images (React Native Image, 2024) */}
       {item.images.length > 0 && (
   <View>
     <Text style={styles.imageLabel}>Evidence Provided by Customer:</Text>
@@ -173,7 +173,7 @@ const AdminDisputeScreen = () => {
       )}
     
 
-    {/* ✅ Fullscreen Image Preview Modal */}
+    {/*  Fullscreen Image Preview Modal (React Native Image, Modal, 2024) */}
           <Modal visible={!!selectedImage} transparent={true} animationType="fade">
             <View style={styles.modalBackground}>
               <TouchableOpacity style={styles.modalClose} onPress={closeImageModal}>
@@ -186,6 +186,7 @@ const AdminDisputeScreen = () => {
   );
 };
 
+// (React Stylesheet)
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
     title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 16, color: "#333" },
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
     imageContainer: { flexDirection: "row", marginVertical: 8 },
     image: { width: 100, height: 100, marginRight: 8, borderRadius: 8 },
     
-    // ✅ Input Styling
+    // Input Styling
     input: { 
       borderWidth: 1, 
       borderColor: "#ccc", 
@@ -223,17 +224,17 @@ const styles = StyleSheet.create({
       backgroundColor: "#fff" 
     },
   
-    // ✅ Button Container
+    // Button Container
     buttonContainer: { 
       flexDirection: "row", 
       justifyContent: "space-between", 
       marginTop: 16 
     },
   
-    // ✅ Approve Button Styling
+    // Approve Button Styling
     approveButton: { 
       flex: 1,
-      backgroundColor: "#28a745",  // Green ✅
+      backgroundColor: "#28a745",  // Green 
       paddingVertical: 12,
       borderRadius: 8,
       alignItems: "center",
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
       shadowRadius: 4,
     },
   
-    // ✅ Reject Button Styling
+    //Reject Button Styling
     rejectButton: { 
       flex: 1,
       backgroundColor: "#dc3545", // Red ❌
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
       shadowRadius: 4,
     },
   
-    // ✅ Button Text
+    // Button Text
     buttonText: { 
       color: "#fff", 
       fontSize: 16, 
@@ -274,3 +275,11 @@ const styles = StyleSheet.create({
   });
 
   export default AdminDisputeScreen;
+
+  // References:
+// - Axios. (2024). Available at: https://rapidapi.com/guides/axios-async-await
+// - Expo Router. (2024). Available at: https://docs.expo.dev/router/introduction/
+// - React. (2024). Available at: https://reactjs.org/docs/hooks-overview.html
+// - React Stylesheet. (2024). Available at: https://reactnative.dev/docs/stylesheet
+// - React Native Image. (2024). Available at: https://reactnative.dev/docs/image
+// - React Native Modal. (2024). Available at: https://reactnative.dev/docs/modal

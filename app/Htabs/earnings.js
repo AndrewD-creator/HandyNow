@@ -6,19 +6,19 @@ import {
   StyleSheet, 
   Alert 
 } from "react-native";
-import axios from "axios";
+import axios from "axios"; // (Axios, 2024)
 import API_URL from "../src/config/apiConfig"; 
-import { useUser } from "../src/context/UserContext"; 
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons"; 
+import { useUser } from "../src/context/UserContext"; //(React,2024)
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons"; //(Expo,2024)
 
 const Earnings = () => {
   const { user } = useUser();
-  const [invoices, setInvoices] = useState([]);
+  const [invoices, setInvoices] = useState([]); // (React,2024)
   const [totalEarnings, setTotalEarnings] = useState(0);
 
   useEffect(() => {
     fetchEarnings();
-  }, []);
+  }, []); //(React,2024)
 
   const fetchEarnings = async () => {
     try {
@@ -31,6 +31,7 @@ const Earnings = () => {
     }
   };
 
+  //(React Flatlist,2024)
   return (
     <View style={styles.container}>
       {/* 💰 Earnings Summary */}
@@ -73,7 +74,7 @@ const Earnings = () => {
   );
 };
 
-// 🔹 Styles
+// (React Stylesheet, 2024)
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
@@ -81,7 +82,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9" 
   },
 
-  // ✅ More professional earnings display
   earningsContainer: {
     backgroundColor: "#fff", 
     padding: 15,
@@ -108,7 +108,6 @@ const styles = StyleSheet.create({
     marginTop: 5 
   },
 
-  // 📃 Invoice Cards
   invoiceCard: {
     backgroundColor: "#fff",
     padding: 16,
@@ -139,7 +138,6 @@ const styles = StyleSheet.create({
 
   customerText: { fontSize: 15, color: "#555",  },
   dateText: { fontSize: 15, color: "#555",  },
-  // ✅ Invoice Status
   statusContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -162,3 +160,10 @@ const styles = StyleSheet.create({
 });
 
 export default Earnings;
+
+// References:
+// - Axios. (2024). Available at: https://rapidapi.com/guides/axios-async-await
+// - Expo. (2024). Available at: https://docs.expo.dev/guides/icons/
+// - React. (2024). Available at: https://reactjs.org/docs/hooks-overview.html
+// - React Flatlist. (2024). Available at: https://reactnative.dev/docs/flatlist
+// - React Stylesheet. (2024). Available at: https://reactnative.dev/docs/stylesheet

@@ -9,11 +9,11 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import axios from "axios";
+import * as ImagePicker from "expo-image-picker"; // (Expo ImagePicker, 2024)
+import { useRouter, useLocalSearchParams } from "expo-router"; // (Expo Router, 2024)
+import axios from "axios"; // (Axios, 2024)
 import API_URL from "../../config/apiConfig";
-import { useUser } from "../../context/UserContext";
+import { useUser } from "../../context/UserContext"; //(React Context, 2024)
 
    
 
@@ -39,7 +39,7 @@ const UserDisputeScreen = () => {
     
   }, [ user]);
 
-  // 🔹 Select Image from Device
+  //  Select Image from Device (Expo ImagePicker, Image, 2024)
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
@@ -47,13 +47,14 @@ const UserDisputeScreen = () => {
       return;
     }
 
+    
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       quality: 0.7,
     });
 
     if (!result.canceled) {
-      setImages([...images, result.assets[0].uri]); // ✅ Fix for Expo SDK 48+
+      setImages([...images, result.assets[0].uri]);
     }
   };
 
@@ -74,7 +75,7 @@ const UserDisputeScreen = () => {
       const formData = new FormData();
       formData.append("booking_id", bookingId);
       formData.append("user_id", user.id);
-      formData.append("handyman_id", handyman_id); // ✅ Ensure we pass handyman_id, not name
+      formData.append("handyman_id", handyman_id); //  Ensure we pass handyman_id, not name
       formData.append("reason", reason);
       formData.append("description", description);
 
@@ -82,16 +83,16 @@ const UserDisputeScreen = () => {
         formData.append(`images`, {
           uri,
           name: `image_${index}.jpg`,
-          type: "image/jpeg", // ✅ Ensure correct image type
+          type: "image/jpeg", //  Ensure correct image type
         });
       });
 
-      await axios.post(`${API_URL}/disputes`, formData, {
+      await axios.post(`${API_URL}/disputes`, formData, { // (Axios, 2024)
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       Alert.alert("Success", "Your dispute has been submitted.");
-      router.back(); // ✅ Redirect to bookings
+      router.back(); //  Redirect to bookings
 
     } catch (error) {
       console.error("❌ Error submitting dispute:", error.response?.data || error.message);
@@ -99,6 +100,7 @@ const UserDisputeScreen = () => {
     }
   };
 
+ // (React Native ScrollView, TouchableOpacity, 2024)
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Raise a Dispute</Text>
@@ -128,14 +130,14 @@ const UserDisputeScreen = () => {
         multiline
       />
 
-      {/* Upload Images */}
+      {/* Upload Images (React Native Image, 2024) */}
 <Text style={styles.label}>Upload Evidence (Optional):</Text>
 <View style={styles.imageContainer}>
   {images.map((uri, index) => (
     <View key={index} style={styles.imageWrapper}>
       <Image source={{ uri }} style={styles.image} />
       
-      {/* ❌ Remove Image Button */}
+      {/* ❌ Remove Image Button  */}
       <TouchableOpacity 
         style={styles.removeButton} 
         onPress={() => handleRemoveImage(index)}
@@ -159,7 +161,7 @@ const UserDisputeScreen = () => {
   );
 };
 
-// 🔹 Styles
+// (React Stylesheet, 2024)
 const styles = StyleSheet.create({
   container: {
     padding: 20,
@@ -274,3 +276,14 @@ const styles = StyleSheet.create({
 });
 
 export default UserDisputeScreen;
+
+// References:
+// - Axios. (2024). Available at: https://rapidapi.com/guides/axios-async-await
+// - Expo Router. (2024). Available at: https://docs.expo.dev/router/introduction/
+// - React. (2024). Available at: https://reactjs.org/docs/hooks-overview.html
+// - React Context. (2024). Available at: https://reactjs.org/docs/context.html
+// - Expo ImagePicker. (2024). Available at: https://docs.expo.dev/versions/latest/sdk/imagepicker/
+// - React Native ScrollView. (2024). Available at: https://reactnative.dev/docs/scrollview
+// - React Native Image. (2024). Available at: https://reactnative.dev/docs/image
+// - React Native TouchableOpacity. (2024). Available at: https://reactnative.dev/docs/touchableopacity
+// - React Stylesheet. (2024). Available at: https://reactnative.dev/docs/stylesheet
