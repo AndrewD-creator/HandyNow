@@ -1,13 +1,54 @@
-import React from 'react';
+import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
-import { useRouter } from "expo-router"; //(Expo Router for Navigation, 2024)
+import { useRouter, useFocusEffect } from "expo-router"; //(Expo Router for Navigation, 2024)
 import { useUser } from "../src/context/UserContext"; 
+import API_URL from "../src/config/apiConfig";
+import axios from "axios"; // ✅ Forgot this import
+
+
+
+// 🔥 Notification Badge Component
+const NotificationBadge = ({ count }) => {
+  if (count === 0) return null; // Hide badge if no items
+
+  return (
+    <View style={styles.badge}>
+      <Text style={styles.badgeText}>{count}</Text>
+    </View>
+  );
+};
 
 const home = () => {
   const router = useRouter();
   const { user } = useUser(); // ✅ Get logged-in handyman info
+  const [jobRequestsCount, setJobRequestsCount] = useState(0);
+  const [myJobsCount, setMyJobsCount] = useState(0);
+  const [disputesCount, setDisputesCount] = useState(0);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchCounts();
+    }, [])
+  );
 
+  const fetchCounts = async () => {
+    try {
+      // Fetch Job Requests Count
+      const jobRequestsRes = await axios.get(`${API_URL}/handyman/job-requests/count/${user.id}`);
+      setJobRequestsCount(jobRequestsRes.data.count);
+
+      // Fetch My Jobs Count
+      const myJobsRes = await axios.get(`${API_URL}/handyman/my-jobs/count/${user.id}`);
+      setMyJobsCount(myJobsRes.data.count);
+
+      // Fetch Dispute Count
+      const disputesRes = await axios.get(`${API_URL}/handyman/disputes/count/${user.id}`);
+      setDisputesCount(disputesRes.data.count);
+
+    } catch (error) {
+      console.error("❌ Error fetching counts:", error);
+    }
+  };
   // Inspired by Card Component
   return (
     <ScrollView style={styles.container}>
@@ -16,41 +57,27 @@ const home = () => {
         <Text style={styles.title}>Welcome, {user?.fullname || "Handyman"}! 👋</Text>
       </View>    
      {/* Navigate to JobRequests */}
-     <TouchableOpacity
-        style={styles.card}
-        onPress={() => router.push("../src/screens/JobRequestsScreen")}
-      >
+     <TouchableOpacity style={styles.card} onPress={() => router.push("../src/screens/JobRequestsScreen")}>
         <View style={styles.cardContent}>
-          <Image
-            source={require('../assets/images/JobRequests.png')} //Handyman Icon generated through AI
-            style={styles.cardImage}
-          />
+          <Image source={require('../assets/images/JobRequests.png')} style={styles.cardImage} />
           <View>
             <Text style={styles.cardTitle}>Job Requests</Text>
-            <Text style={styles.cardDescription}>
-            View, Accept and Decline your job requests.
-            </Text>
+            <Text style={styles.cardDescription}>View, Accept and Decline your job requests.</Text>
           </View>
         </View>
+        <NotificationBadge count={jobRequestsCount} />
       </TouchableOpacity>
 
 {/* Navigate to MyJobs */}
-<TouchableOpacity
-        style={styles.card}
-        onPress={() => router.push("../src/screens/MyJobsScreen")}
-      >
+<TouchableOpacity style={styles.card} onPress={() => router.push("../src/screens/MyJobsScreen")}>
         <View style={styles.cardContent}>
-          <Image
-            source={require('../assets/images/JobRequestsImage.png')} //Handyman Icon generated through AI
-            style={styles.cardImage}
-          />
+          <Image source={require('../assets/images/JobRequestsImage.png')} style={styles.cardImage} />
           <View>
             <Text style={styles.cardTitle}>My Jobs</Text>
-            <Text style={styles.cardDescription}>
-            View and manage your upcoming job bookings in one place.
-            </Text>
+            <Text style={styles.cardDescription}>View and manage your upcoming job bookings.</Text>
           </View>
         </View>
+        <NotificationBadge count={myJobsCount} />
       </TouchableOpacity>
       
       {/* Navigate to MyAvailability */}
@@ -73,22 +100,15 @@ const home = () => {
       </TouchableOpacity>
 
   {/* Navigate to Disputes */}
-  <TouchableOpacity
-        style={styles.card}
-        onPress={() => router.push("../src/screens/HandymanDisputeScreen")}
-      >
+  <TouchableOpacity style={styles.card} onPress={() => router.push("../src/screens/HandymanDisputeScreen")}>
         <View style={styles.cardContent}>
-          <Image
-            source={require('../assets/images/Dispute.png')} //Handyman Icon generated through AI
-            style={styles.cardImage}
-          />
+          <Image source={require('../assets/images/Dispute.png')} style={styles.cardImage} />
           <View>
             <Text style={styles.cardTitle}>Disputes</Text>
-            <Text style={styles.cardDescription}>
-            Look at any job disputes.
-            </Text>
+            <Text style={styles.cardDescription}>Look at any job disputes.</Text>
           </View>
         </View>
+        <NotificationBadge count={disputesCount} />
       </TouchableOpacity>
     </ScrollView>
   );
@@ -108,7 +128,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 16,
-    marginTop: 40,
+    marginTop: 50,
   },
   card: {
     backgroundColor: "#fff",
@@ -122,6 +142,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+    position: "relative", // 🔹 Required for absolute positioning of badge
+
     
   },
   cardContent: {
@@ -146,6 +168,22 @@ const styles = StyleSheet.create({
     lineHeight: 20, 
     flexWrap: "wrap", 
     maxWidth: "80%", 
+  },
+  badge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "blue",
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 

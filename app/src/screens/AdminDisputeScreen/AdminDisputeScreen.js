@@ -94,67 +94,79 @@ const AdminDisputeScreen = () => {
   };
 
   // 🔹 Render Dispute Item
-  const renderDisputeItem = ({ item }) => (
-    <View style={styles.card}>
-      <Text style={styles.customerName}>Customer: {item.customer_name}</Text>
-      <Text style={styles.handymanName}>Handyman: {item.handyman_name}</Text>
-      <Text style={styles.date}>Booking Date: {formatDate(item.booking_date)}</Text>
-      <Text style={styles.reason}>Reason: {item.reason}</Text>
+const renderDisputeItem = ({ item }) => (
+  <View style={styles.card}>
+    <Text style={styles.customerName}>Customer: {item.customer_name}</Text>
+    <Text style={styles.handymanName}>Handyman: {item.handyman_name}</Text>
+    <Text style={styles.date}>Booking Date: {formatDate(item.booking_date)}</Text>
+    <Text style={styles.reason}>Reason: {item.reason}</Text>
 
-      {/* Customer Complaint */}
-      <View style={styles.disputeSection}>
-        <Text style={styles.disputeLabel}>Customer's Dispute:</Text>
-        <Text style={styles.disputeText}>{item.description}</Text>
+    {/* Customer Complaint */}
+    <View style={styles.disputeSection}>
+      <Text style={styles.disputeLabel}>Customer's Dispute:</Text>
+      <Text style={styles.disputeText}>{item.description}</Text>
+   {/* Customer Evidence Images */}
+   {item.images.length > 0 && (
+      <View>
+        <ScrollView horizontal style={styles.imageContainer}>
+          {item.images.map((imagePath, index) => {
+            const imageUrl = `${API_URL}${imagePath}`;
+            return (
+              <TouchableOpacity key={index} onPress={() => handleImagePress(imageUrl)}>
+                <Image source={{ uri: imageUrl }} style={styles.image} />
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
-
-      {/* Handyman Response */}
-      <View style={styles.handymanResponseSection}>
-        <Text style={styles.disputeLabel}>Handyman's Response:</Text>
-        <Text style={styles.disputeText}>
-          {item.handyman_response || "No response from handyman yet."}
-        </Text>
-      </View>
-
-    {/* Shows Images (React Native Image, 2024) */}
-      {item.images.length > 0 && (
-  <View>
-    <Text style={styles.imageLabel}>Evidence Provided by Customer:</Text>
-    <ScrollView horizontal style={styles.imageContainer}>
-      {item.images.map((imagePath, index) => {
-        const imageUrl = `${API_URL}${imagePath}`;
-        return (
-          <TouchableOpacity key={index} onPress={() => handleImagePress(imageUrl)}>
-            <Image 
-              source={{ uri: imageUrl }} 
-              style={styles.image} 
-            />
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
-  </View>
-)}
-
-      {/* Admin Decision Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Add admin decision note..."
-        value={adminNotes[item.dispute_id] || ""}
-        onChangeText={(text) => setAdminNotes({ ...adminNotes, [item.dispute_id]: text })}
-      />
-
-      {/* Approve & Reject Buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.approveButton} onPress={() => handleApprove(item.dispute_id)}>
-          <Text style={styles.buttonText}>✅ Approve Refund</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.rejectButton} onPress={() => handleReject(item.dispute_id)}>
-          <Text style={styles.buttonText}>❌ Reject Refund</Text>
-        </TouchableOpacity>
-      </View>
+    )}
     </View>
-  );
+
+    {/* Handyman Response */}
+    <View style={styles.handymanResponseSection}>
+      <Text style={styles.disputeLabel}>Handyman's Response:</Text>
+      <Text style={styles.disputeText}>
+        {item.handyman_response || "No response from handyman yet."}
+      </Text>
+      {item.completion_image ? (
+  <View>
+    <Text style={styles.imageLabel}>Completion Image Provided by Handyman:</Text>
+    <TouchableOpacity onPress={() => handleImagePress(API_URL + item.completion_image)}>
+      <Image 
+        source={{ uri: API_URL + item.completion_image }} 
+        style={styles.image} 
+        onError={() => console.log("❌ Error loading image:", API_URL + item.completion_image)}
+      />
+    </TouchableOpacity>
+  </View>
+) : (
+  <Text style={styles.noImageText}>No completion image uploaded.</Text>
+)}
+    </View>
+
+ 
+
+    {/* Admin Decision Input */}
+    <TextInput
+      style={styles.input}
+      placeholder="Add admin decision note..."
+      value={adminNotes[item.dispute_id] || ""}
+      onChangeText={(text) => setAdminNotes({ ...adminNotes, [item.dispute_id]: text })}
+    />
+
+    {/* Approve & Reject Buttons */}
+    <View style={styles.buttonContainer}>
+      <TouchableOpacity style={styles.approveButton} onPress={() => handleApprove(item.dispute_id)}>
+        <Text style={styles.buttonText}>Approve Dispute</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.rejectButton} onPress={() => handleReject(item.dispute_id)}>
+        <Text style={styles.buttonText}>Reject Dispute</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+);
+
 
   return (
     <View style={styles.container}>
@@ -267,6 +279,9 @@ const styles = StyleSheet.create({
       fontSize: 16, 
       fontWeight: "bold", 
       textTransform: "uppercase" 
+    },
+    noImageText: {
+ fontSize: 14, color: "#555", marginTop: 6
     },
     modalBackground: { flex: 1, backgroundColor: "rgba(0, 0, 0, 0.8)", justifyContent: "center", alignItems: "center" },
   fullImage: { width: "90%", height: "80%" },

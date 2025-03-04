@@ -1,34 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Alert, TouchableOpacity } from 'react-native';
-import axios from 'axios'; // (Axios HTTP Requests)
-import API_URL from "../../config/apiConfig"; 
-import { useUser } from '../../context/UserContext'; // (React Context, 2024)
+import React, { useEffect, useState } from "react";
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  FlatList, 
+  Alert, 
+  TouchableOpacity, 
+  ActivityIndicator 
+} from "react-native";
+import axios from "axios";
+import API_URL from "../../config/apiConfig";
+import { useUser } from "../../context/UserContext";
+import { Ionicons } from "@expo/vector-icons"; // ✅ Import icons
 
-// (ChatGPT) - Prompt: How to fetch job requests for a handyman and respond with accept or decline
 const JobRequestsScreen = () => {
-  const { user } = useUser(); // Fetch logged-in handyman details
-  const [requests, setRequests] = useState([]); // Store job requests
-  const [loading, setLoading] = useState(true); // Loading state
+  const { user } = useUser();
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(null); // ✅ Track button state
 
-  // Fetch job requests for the logged-in handyman (inspired by axios documentation, 2024)
   useEffect(() => {
     const fetchJobRequests = async () => {
       try {
-        console.log('Fetching job requests for handymanId:', user.id);
-
         const response = await axios.get(`${API_URL}/bookings/requests/${user.id}`);
-
-        console.log('API Response:', response.data);
-
-        if (response.data?.requests) {
-          setRequests(response.data.requests);
-        } else {
-          console.error('Unexpected API response format:', response.data);
-          Alert.alert('Error', 'Unexpected response from server.');
-        }
+        setRequests(response.data.requests || []);
       } catch (error) {
-        console.error('Error fetching job requests:', error.message);
-        Alert.alert('Error', 'Failed to load job requests. Please try again later.');
+        Alert.alert("Error", "Failed to load job requests.");
       } finally {
         setLoading(false);
       }
@@ -37,42 +34,58 @@ const JobRequestsScreen = () => {
     if (user?.id) fetchJobRequests();
   }, [user?.id]);
 
-  // Function to handle accept or decline actions (ChatGPT - Prompt: How to update job request status via API)
   const handleResponse = async (id, status) => {
+    setProcessing(id); // ✅ Show loading on clicked button
     try {
-      const response = await axios.patch(`${API_URL}/bookings/respond/${id}`, { status });
-
-      console.log(`Booking ${id} ${status} response:`, response.data);
-
-      Alert.alert('Success', `Job ${status} successfully.`);
-      // Remove the handled job from the list
+      await axios.patch(`${API_URL}/bookings/respond/${id}`, { status });
+      Alert.alert("Success", `Job ${status} successfully.`);
       setRequests((prev) => prev.filter((request) => request.id !== id));
     } catch (error) {
-      console.error(`Error updating booking ${id} status to ${status}:`, error.message);
-      Alert.alert('Error', 'Failed to update job status. Please try again.');
+      Alert.alert("Error", "Failed to update job status.");
+    } finally {
+      setProcessing(null);
     }
   };
 
-  // Render individual job request card (React Native Documentation - FlatList, 2024)
   const renderRequest = ({ item }) => (
     <View style={styles.card}>
-      <Text style={styles.title}>{item.customerName}</Text>
-      <Text style={styles.details}>{`Description: ${item.description}`}</Text>
-      <Text style={styles.details}>{`Date: ${new Date(item.date).toLocaleDateString('en-IE')}`}</Text>
-      <Text style={styles.details}>{`Address: ${item.address}, ${item.county}, ${item.eircode}`}</Text>
+      <View style={styles.cardHeader}>
+        <Text style={styles.title}>{item.customerName} - {`${new Date(item.date).toLocaleDateString('en-IE')}`} </Text>
+        <Text style={styles.time}>{item.start_time} - {item.end_time}</Text>
+      </View>
+      
+      <Text style={styles.details}>{item.description}</Text>
+      <Text style={styles.address}>{`${item.address}, ${item.county}, ${item.eircode}`}</Text>
 
       <View style={styles.actions}>
         <TouchableOpacity
           style={styles.acceptButton}
-          onPress={() => handleResponse(item.id, 'confirmed')}
+          onPress={() => handleResponse(item.id, "confirmed")}
+          disabled={processing === item.id}
         >
-          <Text style={styles.buttonText}>Accept</Text>
+          {processing === item.id ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Ionicons name="checkmark-circle" size={18} color="#fff" />
+              <Text style={styles.buttonText}>Accept</Text>
+            </>
+          )}
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.declineButton}
-          onPress={() => handleResponse(item.id, 'declined')}
+          onPress={() => handleResponse(item.id, "declined")}
+          disabled={processing === item.id}
         >
-          <Text style={styles.buttonText}>Decline</Text>
+          {processing === item.id ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Ionicons name="close-circle" size={18} color="#fff" />
+              <Text style={styles.buttonText}>Decline</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -82,7 +95,7 @@ const JobRequestsScreen = () => {
     <View style={styles.container}>
       <Text style={styles.header}>Job Requests</Text>
       {loading ? (
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" color="#007bff" />
       ) : requests.length > 0 ? (
         <FlatList
           data={requests}
@@ -90,30 +103,60 @@ const JobRequestsScreen = () => {
           renderItem={renderRequest}
         />
       ) : (
-        <Text>No job requests available.</Text>
+        <Text style={styles.noRequests}>No job requests available.</Text>
       )}
     </View>
   );
 };
 
-
+// 🔹 Enhanced Styling
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f9f9f9' },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
-  card: { padding: 16, backgroundColor: '#fff', marginBottom: 8, borderRadius: 8 },
-  title: { fontSize: 18, fontWeight: 'bold' },
-  details: { marginTop: 4, fontSize: 14 },
-  actions: { flexDirection: 'row', marginTop: 8 },
-  acceptButton: { backgroundColor: '#28a745', padding: 8, borderRadius: 4, marginRight: 8 },
-  declineButton: { backgroundColor: '#dc3545', padding: 8, borderRadius: 4 },
-  buttonText: { color: '#fff', fontWeight: 'bold' },
+  container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
+  header: { fontSize: 24, fontWeight: "bold", marginBottom: 16, textAlign: "center" },
+  noRequests: { fontSize: 16, textAlign: "center", color: "#555", marginTop: 20 },
+  card: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  title: { fontSize: 18, fontWeight: "bold", color: "#333" },
+  time: { fontSize: 14, fontWeight: "bold", color: "#007bff" },
+  details: { fontSize: 14, color: "#444", marginBottom: 4 },
+  address: { fontSize: 13, color: "#777", fontStyle: "italic" },
+  actions: { flexDirection: "row", marginTop: 12, justifyContent: "space-between" },
+  acceptButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#28a745",
+    padding: 10,
+    borderRadius: 6,
+    flex: 1,
+    justifyContent: "center",
+    marginRight: 5,
+  },
+  declineButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#dc3545",
+    padding: 10,
+    borderRadius: 6,
+    flex: 1,
+    justifyContent: "center",
+    marginLeft: 5,
+  },
+  buttonText: { color: "#fff", fontWeight: "bold", marginLeft: 5 },
 });
 
 export default JobRequestsScreen;
-
-// References:
-// • React Native Documentation (2024). Available at: https://reactnative.dev/docs/components-and-apis
-// • Axios HTTP Requests (2024). Available at: https://github.com/axios/axios
-// • React Context (2024). Available at: https://react.dev/reference/react/useContext
-// • ChatGPT (2024) Prompt: How to fetch job requests for a handyman and respond with accept or decline?
-// • React Native FlatList (2024). Available at: https://reactnative.dev/docs/flatlist

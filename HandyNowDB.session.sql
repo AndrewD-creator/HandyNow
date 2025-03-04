@@ -17,7 +17,7 @@ ADD COLUMN county VARCHAR(100),
 ADD COLUMN phone VARCHAR(20),
 ADD COLUMN fullname VARCHAR(255);
 
-DELETE FROM users WHERE id = 25;
+DELETE FROM users WHERE id = 47;
 
 ALTER TABLE users ADD bio TEXT;
 ALTER TABLE users ADD skills TEXT; -- Store skills as a comma-separated string or JSON
@@ -215,3 +215,13 @@ VALUES (37, 'admin', 'admin@example.com', 'admin', 'admin');
 
 
 ALTER TABLE disputes ADD COLUMN admin_response TEXT DEFAULT NULL;
+
+ALTER TABLE users ADD COLUMN profile_picture VARCHAR(255) DEFAULT NULL;
+
+UPDATE users 
+SET address = '45 Maple Drive', 
+    eircode = 'T12X4Y6', 
+    county = 'Cork' 
+WHERE id = 13;
+
+ALTER TABLE bookings ADD COLUMN completion_image VARCHAR(255) DEFAULT NULL;

@@ -80,7 +80,6 @@ const onSignInPressed = async () => {
           <CustomInput placeholder="Password" value={password} setValue={setPassword} secureTextEntry />
 
           <CustomButton text="Sign In" onPress={onSignInPressed} />
-          <CustomButton text="Forgot Password?" onPress={onForgotPasswordPressed} type="TERTIARY" />
           <CustomButton text="Don't have an account? Create one" onPress={onSignUpPressed} type="TERTIARY" />
         </View>
       </ScrollView>

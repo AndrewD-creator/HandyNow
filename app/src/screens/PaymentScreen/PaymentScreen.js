@@ -7,7 +7,7 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import { CardField, useStripe } from '@stripe/stripe-react-native';
+import { CardField, useStripe, PaymentCardTextField } from '@stripe/stripe-react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
 import API_URL from "../../config/apiConfig"; 
@@ -92,7 +92,7 @@ const PaymentScreen = () => {
       if (error) {
         Alert.alert('Payment Failed', error.message);
       } else if (paymentIntent) {
-        Alert.alert('Success', `Payment successful! ID: ${paymentIntent.id}`, [
+        Alert.alert('Success', `Payment successful!`, [
           {
             text: 'OK',
             onPress: () => router.replace("Utabs/home"),
@@ -131,7 +131,7 @@ const PaymentScreen = () => {
       {/* Card Input */}
       <Text style={styles.label}>Card Information</Text>
       <CardField
-        postalCodeEnabled={true}
+        postalCodeEnabled={false}
         placeholder={{ number: '4242 4242 4242 4242' }}
         style={styles.cardField}
         onCardChange={(details) => setCardDetails(details)}

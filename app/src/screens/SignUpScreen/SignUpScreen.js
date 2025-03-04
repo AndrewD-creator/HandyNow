@@ -28,45 +28,68 @@ const SignUpScreen = () => {
   };
 
   const onTermsAndConditionsPressed = () => {
-    console.warn('onTermsAndConditionsPressed');
-  };
+    router.push('src/screens/TermsAndConditionsScreen');  };
 
     // This code is adapted from ChatGPT to match my variables (password & passwordRepeat) 
-  const onRegisterPressed = async () => {
-    if (password !== passwordRepeat) {
-      Alert.alert('Passwords do not match!');
-      return;
-    }
-
-    if (!username || !email || !password || !address || !eircode || !county) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
-
-// (ChatGPT) -Prompt: I want to be able to add users who register into my connected database
-
-    try {
+    const validateInputs = () => {
+      if (!username || !email || !password || !passwordRepeat || !address || !eircode || !county) {
+        Alert.alert('Error', 'All fields must be filled');
+        return false;
+      }
+  
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        Alert.alert('Error', 'Invalid email format');
+        return false;
+      }
+  
+      const eircodeRegex = /^[A-Za-z0-9]{3,4} ?[A-Za-z0-9]{3}$/;
+      if (!eircodeRegex.test(eircode)) {
+        Alert.alert('Error', 'Invalid Eircode format');
+        return false;
+      }
+  
+      if (password.length < 8 || !/\d/.test(password) || !/[A-Z]/.test(password)) {
+        Alert.alert('Error', 'Password must be at least 8 characters long, include a number and an uppercase letter');
+        return false;
+      }
+  
+      if (password !== passwordRepeat) {
+        Alert.alert('Error', 'Passwords do not match');
+        return false;
+      }
+  
+      return true;
+    };
+  
+    // 🔹 Register User
+    const onRegisterPressed = async () => {
+      if (!validateInputs()) return;
+  
+      try {
         const response = await axios.post(`${API_URL}/users`, {
           name: username,
-          email: email,
-          address: address,
-          eircode: eircode,
-          county: county,
-          password: password,
+          email,
+          address,
+          eircode,
+          county,
+          password,
           role: 'user',
-          
         });
   
         if (response.status === 201) {
           Alert.alert('Registration successful');
-          router.push('src/screens/SignInScreen'); 
+          router.push('src/screens/SignInScreen');
         }
       } catch (error) {
         console.error('Error during registration', error);
-        console.warn('Failed to register. Please try again later.');
+        if (error.response) {
+          Alert.alert('Error', error.response.data.error);
+        } else {
+          Alert.alert('Error', 'Failed to register. Please try again later.');
+        }
       }
     };
-
     // (NotJustDev, 2021)
   return (
     <ScrollView>

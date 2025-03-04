@@ -82,7 +82,7 @@ const HandymanDisputeScreen = () => {
                 handymanId: user.id,
                 response: "accepted",
               });
-              Alert.alert("Success", "Dispute resolved. Customer refunded.");
+              Alert.alert("Success", "Dispute resolved. Customer will be refunded.");
               fetchDisputes();
             } catch (error) {
               console.error("❌ Error accepting dispute:", error);
@@ -215,6 +215,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    elevation: 3,
   },
   customerName: { fontSize: 18, fontWeight: "bold", color: "#333" },
   date: { fontSize: 16, color: "#666", marginBottom: 6 },

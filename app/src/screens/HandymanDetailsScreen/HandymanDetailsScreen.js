@@ -7,6 +7,7 @@ import {
   TextInput,
   Alert,
   Platform, ScrollView,
+  Image,
 } from "react-native";
 import { useUser } from "../../context/UserContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -169,12 +170,20 @@ const HandymanDetailsScreen = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.card}>
-        <View style={styles.header}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {selectedHandyman.fullname?.charAt(0)}
-            </Text>
-          </View>
+      <View style={styles.header}>
+  
+    {selectedHandyman.profile_picture ? (
+      <Image
+        source={{ uri: `${selectedHandyman.profile_picture}?timestamp=${new Date().getTime()}` }}
+        style={styles.avatarImage}
+        resizeMode="cover"
+      />
+    ) : (
+      <View style={styles.avatar}>
+        <Text style={styles.avatarText}>{selectedHandyman.fullname?.charAt(0)}</Text>
+      </View>
+    )}
+ 
           <Text style={styles.title}>{selectedHandyman.fullname}</Text>
           <Text style={styles.location}>{selectedHandyman.county}</Text>
         </View>
@@ -365,6 +374,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#007bff",
   },
+  avatarImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 40,
+    marginBottom: 12,
+    elevation: 2,
+  },
+  
   title: {
     fontSize: 24,
     fontWeight: "bold",

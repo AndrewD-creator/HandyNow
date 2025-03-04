@@ -7,7 +7,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Image,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker"; // Image Picker
 import { useUser } from "../src/context/UserContext"; // (React Context)
 import { useRouter } from "expo-router"; // (Expo Router)
 
@@ -18,13 +20,16 @@ import API_URL from "../src/config/apiConfig";
 
 const HandymanProfileScreen = () => {
   const { user, setUser } = useUser(); // (React Context)
-  const [profile, setProfile] = useState({ bio: "", skills: [] });
+  const [profile, setProfile] = useState({ bio: "", skills: [], profile_picture: ""  });
 
   const router = useRouter(); // (Expo Router)
   console.log("User fetched in HandymanProfileScreen:", user);
+  console.log("User details fetched in HandymanProfileScreen:", profile);
+
 
   const [bio, setBio] = useState(""); 
   const [hourlyRate, setHourlyRate] = useState("");
+  const [profilePicture, setProfilePicture] = useState(""); // Store profile picture
   const [skills, setSkills] = useState([
     { id: 1, name: "Plumbing", selected: false },
     { id: 2, name: "Electrical", selected: false },
@@ -39,16 +44,17 @@ const HandymanProfileScreen = () => {
       try {
         const response = await axios.get(`${API_URL}/users/${user.id}/profile`);
         console.log("Fetched profile:", response.data);
-
-        setProfile(response.data);
-        setBio(response.data.bio); // Pre-fill bio field with fetched bio
-        setHourlyRate(response.data.hourly_rate?.toString() ); // Default to 50 if not set
-
-        // Mark selected skills
-        const updatedSkills = skills.map((skill) => ({
-          ...skill,
-          selected: response.data.skills.includes(skill.name),
-        }));
+  
+        setProfile({
+          ...response.data,
+          profile_picture: response.data.profile_picture
+            ? `${API_URL}${response.data.profile_picture}`
+            : "",
+        });
+  
+        setBio(response.data.bio || "");
+        setHourlyRate(response.data.hourly_rate?.toString() || ""); 
+  
         setSkills((prevSkills) =>
           prevSkills.map((skill) => ({
             ...skill,
@@ -59,9 +65,10 @@ const HandymanProfileScreen = () => {
         console.error("Error fetching profile:", error);
       }
     };
-
+  
     fetchProfile();
   }, [user.id]);
+  
 
   const toggleSkill = (id) => {
     setSkills((prevSkills) =>
@@ -70,6 +77,51 @@ const HandymanProfileScreen = () => {
       )
     );
   };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfilePicture(result.assets[0].uri);
+      uploadImage(result.assets[0].uri);
+    }
+  };
+
+  const uploadImage = async (imageUri) => {
+    let formData = new FormData();
+    formData.append("profile_picture", {
+      uri: imageUri,
+      name: `profile_${user.id}.jpg`,
+      type: "image/jpeg",
+    });
+  
+    try {
+      const response = await axios.post(`${API_URL}/users/${user.id}/upload-profile-picture`, formData, {
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
+      Alert.alert("Success", "Profile picture updated!");
+      
+      // ✅ Update state with the new profile picture
+      setProfile((prevProfile) => ({
+        ...prevProfile,
+        profile_picture: `${API_URL}${response.data.profile_picture}`,
+      }));
+    } catch (error) {
+      console.error("❌ Error uploading image:", error);
+      Alert.alert("Error", "Failed to upload profile picture.");
+    }
+  };
+  
+  
 
 // Adapted from (Axios HTTP Requests) & OpenAI (ChatGPT) - Prompt: Make sure the slected skills are being updated
   const saveProfile = async () => {
@@ -95,8 +147,8 @@ const HandymanProfileScreen = () => {
       console.error("Error saving profile:", error);
       Alert.alert("Error", "Failed to save profile. Please try again.");
     }
+  
   };
-
   const logout = () => {
     setUser(null); // Clear user data from context
     router.replace("/"); // Navigate back to the login screen
@@ -105,11 +157,19 @@ const HandymanProfileScreen = () => {
   //(Inspired by React Native TextInput Documentation & OpenAI)
   return (
     <ScrollView style={styles.container}>
-      {/* Profile Header */}
-      <View style={styles.header}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{user?.fullname?.charAt(0)}</Text>
-        </View>
+    <View style={styles.header}>
+    <TouchableOpacity onPress={pickImage}>
+  {profile.profile_picture ? (
+    <Image 
+  source={{ uri: `${profile.profile_picture}?timestamp=${new Date().getTime()}` }} 
+  style={{ width: 100, height: 100, borderRadius: 50 }} 
+  resizeMode="cover"
+/>  ) : (
+    <View style={styles.avatar}>
+      <Text style={styles.avatarText}>{user?.fullname?.charAt(0)}</Text>
+    </View>
+  )}
+</TouchableOpacity>
         <Text style={styles.name}>{user?.fullname || "Name not available"}</Text>
       </View>
 

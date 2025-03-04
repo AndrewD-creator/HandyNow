@@ -9,7 +9,7 @@ import { Picker } from '@react-native-picker/picker';
 
 const HandymanSignUpScreen = () => {
   const [username, setUsername] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [fullname, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -23,47 +23,73 @@ const HandymanSignUpScreen = () => {
 
   const counties = ['Dublin', 'Cork', 'Limerick', 'Galway', 'Waterford'];  
 
-  const onRegisterPressed = async () => {
-    // Check if passwords match (inspired by MDN, 2024)
+  const validateInputs = () => {
+    if (!username || !fullname || !email || !phone ||!password || !repeatPassword || !address || !eircode || !county) {
+      Alert.alert('Error', 'All fields must be filled');
+      return false;
+    }
+  
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Error', 'Invalid email format');
+      return false;
+    }
+  
+    const phoneRegex = /^0[1-9][0-9]{8}$/;
+if (!phoneRegex.test(phone)) {
+  Alert.alert("Error", "Invalid phone number. Must be 10 digits and start with 08 or a landline code.");
+  return false;
+}
+
+    const eircodeRegex = /^[A-Za-z0-9]{3,4} ?[A-Za-z0-9]{3}$/;
+    if (!eircodeRegex.test(eircode)) {
+      Alert.alert('Error', 'Invalid Eircode format');
+      return false;
+    }
+  
+    if (password.length < 8 || !/\d/.test(password) || !/[A-Z]/.test(password)) {
+      Alert.alert('Error', 'Password must be at least 8 characters long and contain a number and an uppercase letter');
+      return false;
+    }
+  
     if (password !== repeatPassword) {
       Alert.alert('Error', 'Passwords do not match');
-      return;
+      return false;
     }
+  
+    return true;
+  };
+  
+  const onTermsAndConditionsPressed = () => {
+    router.push('src/screens/TermsAndConditionsScreen');  };
 
-    // Check if all fields are filled 
-    if (!username || !fullName || !email || !phone || !password || !address || !eircode || !county) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
+  const onRegisterPressed = async () => {
+    if (!validateInputs()) return;
 
+  
     try {
-      console.log('Sending registration data:', {
-        username, fullName, email, phone, password, address, eircode, county, role: 'handyman',
-      });
       const response = await axios.post(`${API_URL}/users`, {
         name: username,
-        fullname: fullName,
-        email: email,
-        phone: phone,
-        password: password,
-        address: address,
-        eircode: eircode,
-        county: county,
+        fullname,
+        email,
+        phone,
+        password,
+        address,
+        eircode,
+        county,
         role: 'handyman',
       });
-
-
-      //(Expo router for naviagtion)
+  
       if (response.status === 201) {
-        Alert.alert('Success', 'Handyman account created successfully!');
-        router.push('src/screens/SignInScreen');  // Navigate to home screen after successful signup
+        Alert.alert('Registration successful');
+        router.push('src/screens/SignInScreen');
       }
-    } catch (error) { // (Inspired by Axios error handling best practices)
-      console.error('Error registering handyman:', error);
+    } catch (error) {
+      console.error('Error during registration', error);
       if (error.response) {
         Alert.alert('Error', error.response.data.error);
       } else {
-        Alert.alert('Error', 'Something went wrong. Please try again.');
+        Alert.alert('Error', 'Failed to register. Please try again later.');
       }
     }
   };
@@ -81,7 +107,7 @@ const HandymanSignUpScreen = () => {
         <Text style={styles.title}>Create a handyman account</Text>
         
         <CustomInput placeholder="Username" value={username} setValue={setUsername} />
-        <CustomInput placeholder="Full Name" value={fullName} setValue={setFullName} />
+        <CustomInput placeholder="Full Name" value={fullname} setValue={setFullName} />
         <CustomInput placeholder="Email" value={email} setValue={setEmail} />
         <CustomInput placeholder="Phone Number" value={phone} setValue={setPhone} />
         
@@ -104,6 +130,12 @@ const HandymanSignUpScreen = () => {
         <CustomInput placeholder="Password" value={password} setValue={setPassword} secureTextEntry />
         <CustomInput placeholder="Confirm Password" value={repeatPassword} setValue={setRepeatPassword} secureTextEntry />
         <CustomButton text="Register" onPress={onRegisterPressed} />
+        <Text style={styles.text}>
+                  By registering, you confirm that you accept our{' '}
+                  <Text style={styles.link} onPress={onTermsAndConditionsPressed}>
+                    Terms and Conditions
+                  </Text>
+                </Text>
         <CustomButton text="Already have an account? Sign In" onPress={onSignInPressed} type="TERTIARY" />
       </View>
     </ScrollView>
@@ -128,7 +160,13 @@ const styles = StyleSheet.create({
     color: '#333',
     fontFamily: 'Roboto',
   },
- 
+  text: {
+    color: 'gray',
+    marginVertical: 10, 
+  },
+  link: {
+    color: '#0000EE',
+  },
   picker: {
     backgroundColor: 'white',
         width: '100%',

@@ -3,12 +3,17 @@ const bodyParser = require('body-parser');
 const db = require('./db');
 const stripe = require('stripe')('sk_test_51QWg2AFz5vaiQFyZMYgiCpoZLJxsIWiyPor0FTmkcVmE0l9CUEygXpv7nKefiRu1k6GQKMyHD061uSN1tFJ9H50z00Os6Ehbf9'); 
 const moment = require('moment-timezone');
-const schedule = require("node-schedule"); // ✅ Import node-schedule for background tasks
+const schedule = require("node-schedule"); // node-schedule for background tasks
 const { Expo } = require("expo-server-sdk");
-const multer = require("multer"); // 📌 For handling image uploads
+const multer = require("multer"); // For handling image uploads
 const path = require("path");
 const app = express();
 const expo = new Expo();
+const bcrypt = require('bcryptjs'); // For password hashing
+const { body, validationResult } = require('express-validator'); // Input validation
+require("dotenv").config();
+
+
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // ✅ Serve static files
 
@@ -20,50 +25,77 @@ const PORT = process.env.PORT || 3000;
 // (ChatGPT) - Prompt: I want to be able to add users who register into my connected database
 app.use(bodyParser.json());
 
+const validateUserRegistration = [
+  body('email').isEmail().withMessage('Invalid email format'),
+  body('password')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long')
+    .matches(/\d/)
+    .withMessage('Password must contain at least one number')
+    .matches(/[A-Z]/)
+    .withMessage('Password must contain at least one uppercase letter'),
+  body('phone')
+    .optional()
+    .matches(/^\d{10}$/)
+    .withMessage('Phone number must be exactly 10 digits'),
+  body('eircode')
+    .matches(/^[A-Za-z0-9]{3,4} ?[A-Za-z0-9]{3}$/)
+    .withMessage('Invalid Eircode format'),
+  body('fullname').optional().matches(/^[A-Za-z\s]+$/).withMessage('Full Name can only contain letters'),
+];
+
 // Endpoint to register users (both regular users and handymen)
-app.post('/users', (req, res) => {
+app.post('/users', validateUserRegistration, async (req, res) => {
   console.log('Received registration request:', req.body);
 
   const { name, fullname, email, phone, password, address, eircode, county, role } = req.body;
 
-  if (role === 'user') {
-    console.log('Customer registration request:', { name, email, password, address, eircode, county, role });
-  
-    if (!name || !email || !password || !address || !eircode || !county || !role) {
-      console.error('Missing fields for customer registration:', { name, email, password, address, eircode, county, role });
-      return res.status(400).json({ error: 'Please provide all required fields.' });
+  // Handle validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    // Check if email is already registered
+    const existingUser = await new Promise((resolve, reject) => {
+      db.query('SELECT id FROM users WHERE email = ?', [email], (err, results) => {
+        if (err) return reject(err);
+        resolve(results.length > 0);
+      });
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email is already registered' });
     }
-  
-    const sql = 'INSERT INTO users (name, email, password, address, eircode, county, role) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    db.query(sql, [name, email, password, address, eircode, county, role], (err, result) => {
+
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    let sql;
+    let values;
+
+    if (role === 'user') {
+      sql = 'INSERT INTO users (name, email, password, address, eircode, county, role) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      values = [name, email, hashedPassword, address, eircode, county, role];
+    } else if (role === 'handyman') {
+      sql = 'INSERT INTO users (name, fullname, email, phone, password, address, eircode, county, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+      values = [name, fullname, email, phone, hashedPassword, address, eircode, county, role];
+    } else {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+
+    db.query(sql, values, (err, result) => {
       if (err) {
-        console.error('Database error during customer registration:', err.message);
+        console.error('Database error during registration:', err.message);
         return res.status(500).json({ error: 'Failed to add user' });
       }
-      console.log('Customer registered successfully with ID:', result.insertId);
-      res.status(201).json({ id: result.insertId });
+      console.log('User registered successfully with ID:', result.insertId);
+      res.status(201).json({ id: result.insertId, message: 'Registration successful!' });
     });
-  }
-  else if (role === 'handyman') {
-    console.log('Handyman registration request:', { name, fullname, email, phone, password, address, eircode, county, role });
-
-    if (!name || !fullname || !email || !phone || !password || !address || !eircode || !county || !role) {
-      console.error('Missing fields for handyman registration:', { name, fullname, email, phone, password, address, eircode, county, role });
-      return res.status(400).json({ error: 'Please fill in all fields for handyman registration' });
-    }
-
-    const sql = 'INSERT INTO users (name, fullname, email, phone, password, address, eircode, county, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    db.query(sql, [name, fullname, email, phone, password, address, eircode, county, role], (err, result) => {
-      if (err) {
-        console.error('Database error during handyman registration:', err.message);
-        return res.status(500).json({ error: 'Failed to add handyman' });
-      }
-      console.log('Handyman registered successfully with ID:', result.insertId);
-      res.status(201).json({ id: result.insertId });
-    });
-  } else {
-    console.error('Invalid role provided:', role);
-    return res.status(400).json({ error: 'Invalid role' });
+  } catch (error) {
+    console.error('Unexpected error during registration:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -71,40 +103,52 @@ app.post('/users', (req, res) => {
 app.post('/login', (req, res) => {
   const { name, password } = req.body;
 
+  console.log('Received login request:', name, password);
 
-
-  console.log('Received login request:', name, password); 
-
-  const sql = 'SELECT * FROM users WHERE name = ? AND password = ?';
-  db.query(sql, [name, password], (err, result) => {
+  const sql = 'SELECT * FROM users WHERE BINARY name = ?';
+  db.query(sql, [name], async (err, result) => {
     if (err) {
-      console.error('Database error:', err); 
+      console.error('Database error:', err);
       return res.status(500).json({ error: 'Database error' });
     }
 
     console.log('Query result:', result); // Log the result
 
-    // If user is found
     if (result.length > 0) {
       const user = result[0];
-      console.log('Fetched user:', user); // Log the fetched user
 
-      if (user.role === 'handyman') {
-        return res.status(200).json({ message: 'Login successful', id: user.id, role: 'handyman', fullname: user.fullname });
+      // Case 1: User has a hashed password (bcrypt compare)
+      if (user.password && user.password.startsWith("$2b$")) {
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+          return res.status(401).json({ error: 'Invalid username or password' });
+        }
+      } 
+      // Case 2: User has a plaintext password (old accounts)
+      else if (user.password === password) {
+        console.warn(`⚠️ User ${name} is using an old plaintext password. Consider updating it.`);
+      } 
+      // Case 3: No valid password found
+      else {
+        return res.status(401).json({ error: 'Invalid username or password' });
       }
-      else if (user.role === 'admin') {
-        return res.status(200).json({ message: 'Login successful', id: user.id, role: 'admin', fullname: user.fullname });
-      }       else {
-        return res.status(200).json({ message: 'Login successful', id: user.id, role: 'user', fullname: user.fullname });
-      }
+
+      // ✅ Login successful, return user details
+      return res.status(200).json({
+        message: 'Login successful',
+        id: user.id,
+        role: user.role,
+        fullname: user.fullname
+      });
     } else {
-      console.log('Invalid credentials for user:', name); 
+      console.log('Invalid credentials for user:', name);
       return res.status(401).json({ error: 'Invalid username or password' });
     }
   });
 });
 
-// create an endpoint to update a user's profile (bio, skills, hourly rate)
+
+// ChatGPT - create an endpoint to update a user's profile (bio, skills, hourly rate)
 app.put('/users/:id/profile', (req, res) => {
   const { id } = req.params;
   let { bio, skills, hourly_rate } = req.body;
@@ -132,7 +176,7 @@ app.put('/users/:id/profile', (req, res) => {
 app.get('/users/:id/profile', (req, res) => {
   const { id } = req.params;
 
-  const sql = 'SELECT bio, skills, COALESCE(hourly_rate, 0) AS hourly_rate FROM users WHERE id = ?';
+  const sql = 'SELECT bio, skills, COALESCE(hourly_rate, 0) AS hourly_rate, profile_picture FROM users WHERE id = ?';
   db.query(sql, [id], (err, result) => {
     if (err) {
       console.error('❌ Error fetching profile:', err.message);
@@ -145,7 +189,8 @@ app.get('/users/:id/profile', (req, res) => {
       res.status(200).json({
         bio: userProfile.bio || '',
         skills: userProfile.skills ? userProfile.skills.split(',') : [],
-        hourly_rate: parseFloat(userProfile.hourly_rate), // ✅ Ensure numeric value
+        hourly_rate: parseFloat(userProfile.hourly_rate),
+        profile_picture: userProfile.profile_picture || null // ✅ Return profile picture URL
       });
     } else {
       res.status(404).json({ error: 'User not found' });
@@ -154,7 +199,8 @@ app.get('/users/:id/profile', (req, res) => {
 });
 
 
-// (OpenAI)
+
+// (OpenAI) - Create an endpoint to fetch name and email from users
 app.get('/users/:id', (req, res) => {
   const { id } = req.params;
 
@@ -191,6 +237,7 @@ app.get('/search-handymen', (req, res) => {
       u.county, 
       u.bio,
       u.hourly_rate,
+      u.profile_picture,
       COALESCE(ROUND(AVG(r.rating), 2), 0) AS average_rating
     FROM 
       users u
@@ -203,7 +250,9 @@ app.get('/search-handymen', (req, res) => {
       AND u.county = ? 
       AND FIND_IN_SET(?, u.skills)
     GROUP BY 
-      u.id, u.fullname, u.skills, u.county, u.bio, u.hourly_rate;
+      u.id, u.fullname, u.skills, u.county, u.bio, u.hourly_rate, u.profile_picture
+    ORDER BY 
+      average_rating DESC;
   `;
 
   db.query(sql, ['handyman', county, skill], (err, results) => {
@@ -221,6 +270,9 @@ app.get('/search-handymen', (req, res) => {
     const handymen = results.map((handyman) => ({
       ...handyman,
       skills: handyman.skills ? handyman.skills.split(',') : [],
+      profile_picture: handyman.profile_picture
+        ? `${process.env.API_URL}${handyman.profile_picture}` // 🔥 Fix profile picture path
+        : null,
     }));
 
     console.log('Processed handymen:', handymen);
@@ -339,7 +391,7 @@ app.post('/bookings', async (req, res) => {
 
 
 
-// (ChatGPT) - Prompt: "How to integrate Stripe payment processing into an Express.js application?"
+// (ChatGPT) - Prompt: "How to integrate Stripe payment processing into an application?"
 app.post('/create-payment-intent', async (req, res) => {
   try {
     const { amount, currency } = req.body;
@@ -403,7 +455,7 @@ app.get('/calculate-price', async (req, res) => {
 
 
 
-// (ChatGPT) - Prompt: "How do I fetch user bookings from a MySQL database with filtering (active, past, all) using Express?"
+// (ChatGPT) - Prompt: "How do I fetch user bookings from a MySQL database with filtering (active, past, all)?"
 app.get('/bookings/user/:id', (req, res) => {
   const userId = req.params.id;
   const filter = req.query.filter; // Extract the filter query parameter
@@ -451,7 +503,7 @@ app.get('/bookings/user/:id', (req, res) => {
   });
 });
 
-// (ChatGPT) - Prompt: "How can I implement an API endpoint to cancel a booking in an Express app and MySQL database?"
+// (ChatGPT) - Prompt: "How can I implement an API endpoint to cancel a booking in a MySQL database?"
 app.patch('/bookings/cancel/:id', (req, res) => {
   const bookingId = req.params.id;
 
@@ -482,6 +534,8 @@ app.get("/bookings/requests/:handymanId", (req, res) => {
       b.id, 
       b.description, 
       b.date, 
+      TIME_FORMAT(b.start_time, '%H:%i') AS start_time,   -- ✅ Format time to HH:MM
+      TIME_FORMAT(b.end_time, '%H:%i') AS end_time, 
       u.name AS customerName,
       u.county,
       u.address,
@@ -659,7 +713,7 @@ app.post('/reviews', async (req, res) => {
   }
 });
 
-// (ChatGPT) - Prompt: "How to fetch and display reviews and ratings for a specific handyman from a MySQL databases?"
+// (ChatGPT) - Prompt: "How to fetch and display ratings for a specific handyman from a MySQL databases?"
 app.get('/reviews/handyman/:handyman_id', async (req, res) => {
   const { handyman_id } = req.params;
 
@@ -1054,13 +1108,26 @@ schedule.scheduleJob("*/30 * * * *", async () => {
 //ChatGPT - "How can I implement a file upload using Multer, ensuring only images (JPEG, JPG, PNG) are allowed?"
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/dispute_images/"); // Save images in our created folder
+    if (req.url.includes("/upload-profile-picture")) {
+      cb(null, "uploads/profile_pictures/");
+    } else if (req.url.includes("/disputes")) {
+      cb(null, "uploads/dispute_images/");
+    } else if (req.url.includes("/completion-image")) {
+      cb(null, "uploads/completion_images/"); // 📌 Store completion images separately
+    } else {
+      cb(new Error("Invalid upload destination"), null);
+    }
   },
   filename: (req, file, cb) => {
-    cb(null, `dispute_${Date.now()}${path.extname(file.originalname)}`);
+    if (req.url.includes("/upload-profile-picture")) {
+      cb(null, `profile_${req.params.userId}${path.extname(file.originalname)}`);
+    } else if (req.url.includes("/completion-image")) {
+      cb(null, `completion_${req.params.bookingId}${path.extname(file.originalname)}`); // ✅ Unique name for completion images
+    } else {
+      cb(null, `dispute_${Date.now()}${path.extname(file.originalname)}`);
+    }
   },
 });
-
 
 const upload = multer({
   storage,
@@ -1077,6 +1144,8 @@ const upload = multer({
     }
   },
 });
+
+
 
 // ChatGPT - How can I create an API endpoint that allows users to file a dispute with image evidence
 app.post("/disputes", upload.array("images", 5), async (req, res) => {
@@ -1199,7 +1268,7 @@ app.get("/admin/disputes", async (req, res) => {
       SELECT d.dispute_id, d.booking_id, d.user_id, d.handyman_id, d.reason, 
              d.description, d.images, d.status, d.handyman_response, 
              u.name AS customer_name, h.fullname AS handyman_name, 
-             b.date AS booking_date
+             b.date AS booking_date, b.completion_image
       FROM disputes d
       JOIN bookings b ON d.booking_id = b.id
       JOIN users u ON d.user_id = u.id
@@ -1210,7 +1279,7 @@ app.get("/admin/disputes", async (req, res) => {
 
     const disputes = await db.query(sql);
 
-    // ✅ Convert images JSON string into an array
+    // ✅ Convert JSON string images into an array
     disputes.forEach((dispute) => {
       try {
         dispute.images = dispute.images ? JSON.parse(dispute.images) : [];
@@ -1218,7 +1287,15 @@ app.get("/admin/disputes", async (req, res) => {
         console.warn(`⚠️ Error parsing images for dispute ${dispute.dispute_id}:`, error);
         dispute.images = [];
       }
+
+      // ✅ Ensure completion_image is formatted correctly
+      if (dispute.completion_image) {
+        dispute.completion_image = `${dispute.completion_image}`;
+      }
     });
+
+    // 🔹 Log to check if completion images exist
+    console.log("🟢 API Response:", JSON.stringify(disputes, null, 2));
 
     res.status(200).json({ disputes });
   } catch (error) {
@@ -1226,6 +1303,7 @@ app.get("/admin/disputes", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch admin disputes." });
   }
 });
+
 
 // ChatGPT - How can an admin approve or reject a dispute and update the status in the database
 app.patch("/admin/resolve-dispute", async (req, res) => {
@@ -1263,6 +1341,91 @@ app.patch("/admin/resolve-dispute", async (req, res) => {
     res.status(500).json({ error: "Failed to process dispute resolution." });
   }
 });
+
+app.post("/users/:userId/upload-profile-picture", upload.single("profile_picture"), (req, res) => {
+  console.log("📩 Request received:", req.body);
+  console.log("📷 File received:", req.file);
+
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded." });
+  }
+
+  const profilePictureUrl = `/uploads/profile_pictures/${req.file.filename}`;
+  const userId = req.params.userId;
+
+  console.log("📝 SQL Query about to run:", `UPDATE users SET profile_picture = '${profilePictureUrl}' WHERE id = ${userId}`);
+
+  const sql = `UPDATE users SET profile_picture = ? WHERE id = ?`;
+
+  db.query(sql, [profilePictureUrl, userId], (err, result) => {
+    if (err) {
+      console.error("❌ Error saving profile picture in DB:", err);
+      return res.status(500).json({ error: "Failed to update profile picture in database." });
+    }
+
+    console.log("✅ Database updated successfully:", result);
+    res.status(200).json({ profile_picture: profilePictureUrl });
+  });
+});
+
+app.post("/bookings/:bookingId/completion-image", upload.single("image"), (req, res) => {
+  const { bookingId } = req.params;
+
+  if (!req.file) {
+    return res.status(400).json({ error: "No image uploaded" });
+  }
+
+  const imagePath = `/uploads/completion_images/${req.file.filename}`;
+
+  const sql = "UPDATE bookings SET completion_image = ? WHERE id = ?";
+  db.query(sql, [imagePath, bookingId], (err, result) => {
+    if (err) {
+      console.error("Error saving completion image:", err);
+      return res.status(500).json({ error: "Failed to update booking with image" });
+    }
+    res.status(200).json({ message: "Completion image uploaded successfully!", image: imagePath });
+  });
+});
+
+// Get count of pending disputes for handymen
+app.get("/handyman/disputes/count/:handymanId", async (req, res) => {
+  try {
+    const { handymanId } = req.params; // ✅ You forgot this line!
+    const sql = "SELECT COUNT(*) AS count FROM disputes WHERE handyman_id = ? AND status = 'Pending Handyman'";
+    const [result] = await db.query(sql, [handymanId]);
+    res.json({ count: result.count });
+  } catch (error) {
+    console.error("Error fetching dispute count:", error);
+    res.status(500).json({ error: "Failed to fetch count." });
+  }
+});
+
+// Get count of new job requests for handymen
+app.get("/handyman/job-requests/count/:handymanId", async (req, res) => {
+  try {
+    const { handymanId } = req.params;
+    const sql = "SELECT COUNT(*) AS count FROM bookings WHERE handyman_id = ? AND status = 'pending'";
+    const [result] = await db.query(sql, [handymanId]);
+    res.json({ count: result.count });
+  } catch (error) {
+    console.error("Error fetching job request count:", error);
+    res.status(500).json({ error: "Failed to fetch count." });
+  }
+});
+
+// Get count of active jobs for a handyman
+app.get("/handyman/my-jobs/count/:handymanId", async (req, res) => {
+  try {
+    const { handymanId } = req.params;
+    const sql = "SELECT COUNT(*) AS count FROM bookings WHERE handyman_id = ? AND status = 'confirmed'";
+    const [result] = await db.query(sql, [handymanId]);
+    res.json({ count: result.count });
+  } catch (error) {
+    console.error("Error fetching my jobs count:", error);
+    res.status(500).json({ error: "Failed to fetch count." });
+  }
+});
+
 
 
 // Start the server
