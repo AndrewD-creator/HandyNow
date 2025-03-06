@@ -10,11 +10,12 @@ import {
   ActivityIndicator 
 } from "react-native";
 import * as ImagePicker from "expo-image-picker"; // Image Picker
-import axios from "axios"; // Axios
+import axios from "axios"; // (Axios Documentation, 2024)
 import API_URL from "../../config/apiConfig"; 
-import { useUser } from "../../context/UserContext"; // User Context
-import { Ionicons } from "@expo/vector-icons"; // ✅ Import icons
+import { useUser } from "../../context/UserContext"; // (React Context, 2024)
+import { Ionicons } from "@expo/vector-icons"; 
 
+// (ChatGPT) - Prompt: How do I fetch and display job listings for a logged-in handyman with an option to mark them as complete?
 const MyJobsScreen = () => {
   const { user } = useUser(); 
   const [jobs, setJobs] = useState([]); 
@@ -22,6 +23,7 @@ const MyJobsScreen = () => {
   const [uploadedImages, setUploadedImages] = useState({});
   const [processingJob, setProcessingJob] = useState(null); // ✅ Track button state
 
+    // Fetch jobs for the logged-in handyman (Axios Documentation, 2024)
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -91,6 +93,7 @@ const MyJobsScreen = () => {
     }
   };
 
+    // Render individual job card (React Native FlatList Documentation, 2024)
   const renderJob = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -149,7 +152,7 @@ const MyJobsScreen = () => {
   );
 };
 
-// 🔹 Enhanced Styling
+// React Native styling (React Native Documentation, 2024)
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
   header: { fontSize: 24, fontWeight: "bold", marginBottom: 16, textAlign: "center" },
@@ -206,3 +209,10 @@ const styles = StyleSheet.create({
 });
 
 export default MyJobsScreen;
+
+// References:
+// • React Native Documentation (2024). Available at: https://reactnative.dev/docs/components-and-apis
+// • Axios Documentation (2024). Available at: https://axios-http.com/docs/intro
+// • React Context (2024). Available at: https://react.dev/reference/react/useContext
+// • React Native FlatList Documentation (2024). Available at: https://reactnative.dev/docs/flatlist
+// • ChatGPT (2024).

@@ -23,32 +23,32 @@ const CalendarScreen = () => {
     }, [user])
   );
 
-  // 🔹 Fetch Availability & Confirmed Bookings
+  //  Fetch Availability & Confirmed Bookings
   const fetchCalendarData = async (handymanId) => {
     try {
       console.log(`📅 Fetching availability for handyman_id: ${handymanId}`);
 
-      // ✅ Fetch availability
+      //  Fetch availability
       const availabilityResponse = await axios.get(`${API_URL}/api/handyman/availability`, {
         params: { handyman_id: handymanId },
       });
 
       console.log(`✅ Availability API Response:`, availabilityResponse.data);
 
-      // ✅ Fetch confirmed jobs
+      // Fetch confirmed jobs
       const bookingsResponse = await axios.get(`${API_URL}/bookings/my-jobs/${handymanId}`);
 
       console.log(`✅ Confirmed Bookings API Response:`, bookingsResponse.data);
 
       const { recurring = [], exceptions = [] } = availabilityResponse.data;
-      const confirmedBookings = bookingsResponse.data.jobs || []; // ✅ Corrected variable
+      const confirmedBookings = bookingsResponse.data.jobs || []; 
 
       const events = [];
       const today = new Date();
       const threeMonthsLater = new Date();
       threeMonthsLater.setMonth(today.getMonth() + 3);
 
-      // 🔹 Generate Availability Events
+      //  Generate Availability Events
       for (let date = new Date(today); date <= threeMonthsLater; date.setDate(date.getDate() + 1)) {
         const weekday = date.toLocaleDateString('en-IE', { weekday: 'long' });
 
@@ -65,7 +65,7 @@ const CalendarScreen = () => {
         });
       }
 
-      // 🔹 Add Exceptions
+      //  Add Exceptions
       exceptions.forEach(({ date, start_time, end_time, available }) => {
         if (available) {
           events.push({
@@ -84,19 +84,19 @@ const CalendarScreen = () => {
         }
       });
 
-      // 🔹 Add Confirmed Jobs
+      //  Add Confirmed Jobs
 confirmedBookings.forEach(({ date, start_time, end_time, customerName, description, address, eircode, county }) => {
   if (!start_time || !end_time) {
     console.warn(`⚠️ Skipping job - Missing time:`, { date, start_time, end_time });
     return;
   }
 
-  // ✅ Convert Date Correctly (Remove "T00:00:00.000Z" issue)
+  // Convert Date Correctly (Remove "T00:00:00.000Z" issue)
   const formattedDate = date.split('T')[0]; // Extract YYYY-MM-DD
   const formattedStart = start_time.length === 5 ? `${start_time}:00` : start_time; // Ensure "HH:mm:ss"
   const formattedEnd = end_time.length === 5 ? `${end_time}:00` : end_time;
 
-  // ✅ Ensure new Date() works properly
+  //  Ensure new Date() works properly
   const jobStart = new Date(`${formattedDate}T${formattedStart}`);
   const jobEnd = new Date(`${formattedDate}T${formattedEnd}`);
 
@@ -118,14 +118,14 @@ confirmedBookings.forEach(({ date, start_time, end_time, customerName, descripti
     title: `🔨 Job with ${customerName}`,
     start: jobStart,
     end: jobEnd,
-    color: 'orange', // ✅ Different color for confirmed jobs
-    description: `Desciption: ${description}\n📍Address: ${address}, ${county}, ${eircode}`, // ✅ Include address
+    color: 'orange', 
+    description: `Desciption: ${description}\n📍Address: ${address}, ${county}, ${eircode}`, 
   });
 });
 
 
       console.log(`📅 Final Events Array:`, events);
-      setEvents(events); // ✅ Update state
+      setEvents(events); 
     } catch (error) {
       console.error('❌ Error fetching calendar data:', error.message || error);
       Alert.alert('Error', 'Failed to load calendar data.');
@@ -139,7 +139,7 @@ confirmedBookings.forEach(({ date, start_time, end_time, customerName, descripti
         height={600}
         mode="week"
         eventCellStyle={(event) => ({ backgroundColor: event.color })}
-        scrollOffsetMinutes={420} // Start at 7 AM
+        scrollOffsetMinutes={420} 
         onPressEvent={(event) =>
           Alert.alert(
             event.title,

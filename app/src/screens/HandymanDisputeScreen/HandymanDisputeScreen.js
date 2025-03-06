@@ -22,7 +22,7 @@ const HandymanDisputeScreen = () => {
   const [disputes, setDisputes] = useState([]); // (React, 2024)
   const [loading, setLoading] = useState(true);
   const [rejectComments, setRejectComments] = useState({});
-  const [selectedImage, setSelectedImage] = useState(null); // ✅ Store the selected image
+  const [selectedImage, setSelectedImage] = useState(null); // Store the selected image
 
 
   useEffect(() => {

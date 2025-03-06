@@ -46,7 +46,7 @@ const AdminDisputeScreen = () => {
     return isoDate.split("T")[0].split("-").reverse().join("/");
   };
 
-   // ✅Handle Image Click to Show Fullscreen Modal
+   // Handle Image Click to Show Fullscreen Modal
    const handleImagePress = (imageUrl) => {
     setSelectedImage(imageUrl);
   };
@@ -93,7 +93,7 @@ const AdminDisputeScreen = () => {
     }
   };
 
-  // 🔹 Render Dispute Item
+  //  Render Dispute Item
 const renderDisputeItem = ({ item }) => (
   <View style={styles.card}>
     <Text style={styles.customerName}>Customer: {item.customer_name}</Text>
@@ -130,7 +130,7 @@ const renderDisputeItem = ({ item }) => (
       </Text>
       {item.completion_image ? (
   <View>
-    <Text style={styles.imageLabel}>Completion Image Provided by Handyman:</Text>
+    <Text style={styles.imageLabel}></Text>
     <TouchableOpacity onPress={() => handleImagePress(API_URL + item.completion_image)}>
       <Image 
         source={{ uri: API_URL + item.completion_image }} 
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
       alignItems: "center",
       marginRight: 5, 
       elevation: 3, // Shadow for Android
-      shadowColor: "#000", // Shadow for iOS
+      shadowColor: "#000", 
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,
@@ -261,13 +261,13 @@ const styles = StyleSheet.create({
     //Reject Button Styling
     rejectButton: { 
       flex: 1,
-      backgroundColor: "#dc3545", // Red ❌
+      backgroundColor: "#dc3545", 
       paddingVertical: 12,
       borderRadius: 8,
       alignItems: "center",
       marginLeft: 5, 
       elevation: 3, // Shadow for Android
-      shadowColor: "#000", // Shadow for iOS
+      shadowColor: "#000", 
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,

@@ -9,10 +9,13 @@ import API_URL from "../src/config/apiConfig"
 const profile = () => {
   const { user, setUser } = useUser(); 
   const [profile, setProfile] = useState({ name: "", email: "" });
+  const [loading, setLoading] = useState(true); // Track loading state
   const router = useRouter();
 
-  // (React Context 2024)
+    // (React Context 2024)
   useEffect(() => {
+    if (!user) return; // Ensure user is defined before fetching
+
     const fetchProfile = async () => {
       try {
         console.log("Fetching profile for user ID:", user.id);
@@ -22,16 +25,26 @@ const profile = () => {
       } catch (error) {
         console.error("Error fetching user profile:", error);
         Alert.alert("Error", "Failed to load profile. Please try again.");
+      } finally {
+        setLoading(false); // Stop loading when done
       }
     };
 
     fetchProfile();
-  }, [user.id]);
+  }, [user?.id]); // Use optional chaining to prevent crashes
 
   const logout = () => {
     setUser(null); 
     router.replace("/"); 
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -51,6 +64,7 @@ const profile = () => {
     </View>
   );
 };
+
 
 // (inspired by OpenAI and react native stylesheet)
 const styles = StyleSheet.create({

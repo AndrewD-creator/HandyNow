@@ -52,6 +52,7 @@ if (!phoneRegex.test(phone)) {
       return false;
     }
   
+        // Check if passwords match (inspired by MDN, 2024)
     if (password !== repeatPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return false;

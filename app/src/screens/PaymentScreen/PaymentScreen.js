@@ -7,31 +7,31 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import { CardField, useStripe, PaymentCardTextField } from '@stripe/stripe-react-native';
-import { FontAwesome } from '@expo/vector-icons';
-import axios from 'axios';
+import { CardField, useStripe, PaymentCardTextField } from '@stripe/stripe-react-native'; //(Stripe React Native, 2024)
+import { FontAwesome } from '@expo/vector-icons';// (Expo vector icons, 2024)
+import axios from 'axios'; // (Axios HTTP Requests)
 import API_URL from "../../config/apiConfig"; 
-import { useRouter } from "expo-router";
-import { useUser } from "../../context/UserContext"; // ✅ Access selected booking
+import { useRouter } from "expo-router"; //(Expo Router)
+import { useUser } from "../../context/UserContext"; 
 
 // • ChatGPT (2024) - Prompt: "How do I implement a payment screen in React Native using Stripe API and handle navigation after successful payment?"
 const PaymentScreen = () => {
   const { confirmPayment } = useStripe();
   const router = useRouter();
-  const { selectedBooking } = useUser(); // ✅ Get selected booking details
+  const { selectedBooking } = useUser(); //  Get selected booking details
   console.log("📌 Loaded Selected Booking in PaymentScreen:", selectedBooking);
   const { selectedHandyman } = useUser(); 
   const [email, setEmail] = useState('');
   const [cardholderName, setCardholderName] = useState('');
   const [cardDetails, setCardDetails] = useState(null);
-  const [totalAmount, setTotalAmount] = useState(null); // ✅ Store price in cents
+  const [totalAmount, setTotalAmount] = useState(null); // Store price in cents
 
-  // 🔹 Fetch calculated price when screen loads
+  //  Fetch calculated price when screen loads
   useEffect(() => {
     if (selectedBooking) {
       fetchPrice();
     }
-  }, [selectedBooking]);  // ✅ Runs when `selectedBooking` changes
+  }, [selectedBooking]);  // Runs when `selectedBooking` changes
   
       console.log(`🔍 Fetching price for Handyman ID: ${selectedBooking.handyman_id}, Duration: ${selectedBooking.duration}`);
 
@@ -43,6 +43,7 @@ const PaymentScreen = () => {
       
         console.log(`🔍 Fetching price for Handyman ID: ${selectedBooking.handyman_id}, Duration: ${selectedBooking.duration}`);
       
+          // Function to handle payment (Axios HTTP Requests, 2024)
         try {
           const response = await axios.get(`${API_URL}/calculate-price`, {
             params: {
@@ -52,7 +53,7 @@ const PaymentScreen = () => {
           });
       
           console.log("✅ Price API Response:", response.data);
-          setTotalAmount(response.data.price);  // ✅ Correct state update
+          setTotalAmount(response.data.price);  
       
         } catch (error) {
           console.error("❌ Error fetching price:", error);
@@ -62,7 +63,7 @@ const PaymentScreen = () => {
       
   
 
-  // 🔹 Handle Payment Process
+  // Handle Payment Process
   const handlePayment = async () => {
     if (!email || !cardholderName || !cardDetails?.complete) {
       Alert.alert('Error', 'Please fill in all fields and complete card details.');
@@ -75,20 +76,21 @@ const PaymentScreen = () => {
     }
 
     try {
-      // ✅ Step 1: Create Payment Intent
+      //  Step 1: Create Payment Intent
       const response = await axios.post(`${API_URL}/create-payment-intent`, {
-        amount: totalAmount, // ✅ Use dynamically fetched amount
+        amount: totalAmount, // Use dynamically fetched amount
         currency: 'eur',
       });
 
       const { clientSecret } = response.data;
 
-      // ✅ Step 2: Confirm Payment
+      //  Step 2: Confirm Payment
       const { error, paymentIntent } = await confirmPayment(clientSecret, {
         paymentMethodType: 'Card',
         billingDetails: { email, name: cardholderName },
       });
 
+      // Navigate back to the home screen after successful payment (Expo Router for Navigation, 2024)
       if (error) {
         Alert.alert('Payment Failed', error.message);
       } else if (paymentIntent) {
@@ -150,7 +152,7 @@ const PaymentScreen = () => {
   );
 };
 
-// 🔹 Styles
+// React Native styling (React Native Documentation, 2024)
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF', padding: 20, justifyContent: 'center' },
   title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 24, color: '#333' },

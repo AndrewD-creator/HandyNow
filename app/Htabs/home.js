@@ -3,11 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from "rea
 import { useRouter, useFocusEffect } from "expo-router"; //(Expo Router for Navigation, 2024)
 import { useUser } from "../src/context/UserContext"; 
 import API_URL from "../src/config/apiConfig";
-import axios from "axios"; // ✅ Forgot this import
+import axios from "axios"; 
 
 
 
-// 🔥 Notification Badge Component
+//  Notification Badge Component
 const NotificationBadge = ({ count }) => {
   if (count === 0) return null; // Hide badge if no items
 
@@ -20,7 +20,7 @@ const NotificationBadge = ({ count }) => {
 
 const home = () => {
   const router = useRouter();
-  const { user } = useUser(); // ✅ Get logged-in handyman info
+  const { user } = useUser(); // Get logged-in handyman info
   const [jobRequestsCount, setJobRequestsCount] = useState(0);
   const [myJobsCount, setMyJobsCount] = useState(0);
   const [disputesCount, setDisputesCount] = useState(0);
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
-    position: "relative", // 🔹 Required for absolute positioning of badge
+    position: "relative", 
 
     
   },

@@ -8,17 +8,19 @@ import {
   TouchableOpacity, 
   ActivityIndicator 
 } from "react-native";
-import axios from "axios";
 import API_URL from "../../config/apiConfig";
-import { useUser } from "../../context/UserContext";
-import { Ionicons } from "@expo/vector-icons"; // ✅ Import icons
+import axios from 'axios'; // (Axios HTTP Requests)import API_URL from "../../config/apiConfig";
+import { useUser } from "../../context/UserContext";//(React Context, 2024)
+import { Ionicons } from "@expo/vector-icons"; 
 
+// (ChatGPT) - Prompt: How to fetch job requests for a handyman and respond with accept or decline
 const JobRequestsScreen = () => {
   const { user } = useUser();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(null); // ✅ Track button state
+  const [processing, setProcessing] = useState(null); 
 
+    // Fetch job requests for the logged-in handyman (inspired by axios documentation, 2024)
   useEffect(() => {
     const fetchJobRequests = async () => {
       try {
@@ -34,8 +36,9 @@ const JobRequestsScreen = () => {
     if (user?.id) fetchJobRequests();
   }, [user?.id]);
 
+    // Function to handle accept or decline actions (ChatGPT - Prompt: How to update job request status via API)
   const handleResponse = async (id, status) => {
-    setProcessing(id); // ✅ Show loading on clicked button
+    setProcessing(id); //  Show loading on clicked button
     try {
       await axios.patch(`${API_URL}/bookings/respond/${id}`, { status });
       Alert.alert("Success", `Job ${status} successfully.`);
@@ -47,6 +50,7 @@ const JobRequestsScreen = () => {
     }
   };
 
+    // Render individual job request card (React Native Documentation - FlatList, 2024)
   const renderRequest = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -160,3 +164,10 @@ const styles = StyleSheet.create({
 });
 
 export default JobRequestsScreen;
+
+// References:
+// • React Native Documentation (2024). Available at: https://reactnative.dev/docs/components-and-apis
+// • Axios HTTP Requests (2024). Available at: https://github.com/axios/axios
+// • React Context (2024). Available at: https://react.dev/reference/react/useContext
+// • ChatGPT (2024) Prompt: How to fetch job requests for a handyman and respond with accept or decline?
+// • React Native FlatList (2024). Available at: https://reactnative.dev/docs/flatlist

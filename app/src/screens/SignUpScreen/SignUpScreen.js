@@ -131,7 +131,7 @@ const SignUpScreen = () => {
         />
 
         <CustomInput
-          placeholder="Repeat Password"
+          placeholder="Confirm Password"
           value={passwordRepeat}
           setValue={setPasswordRepeat}
           secureTextEntry={true}

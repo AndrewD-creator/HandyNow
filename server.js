@@ -41,8 +41,11 @@ const validateUserRegistration = [
   body('eircode')
     .matches(/^[A-Za-z0-9]{3,4} ?[A-Za-z0-9]{3}$/)
     .withMessage('Invalid Eircode format'),
-  body('fullname').optional().matches(/^[A-Za-z\s]+$/).withMessage('Full Name can only contain letters'),
-];
+    body('fullname')
+    .optional()
+    .matches(/^[A-Za-z\s']+$/)
+    .withMessage("Full Name can only contain letters, spaces, and apostrophes"),
+  ];
 
 // Endpoint to register users (both regular users and handymen)
 app.post('/users', validateUserRegistration, async (req, res) => {
@@ -1342,6 +1345,7 @@ app.patch("/admin/resolve-dispute", async (req, res) => {
   }
 });
 
+// ChatGPT - How do i save a profile picture into my database and into my profile pictures folder
 app.post("/users/:userId/upload-profile-picture", upload.single("profile_picture"), (req, res) => {
   console.log("📩 Request received:", req.body);
   console.log("📷 File received:", req.file);
@@ -1368,6 +1372,7 @@ app.post("/users/:userId/upload-profile-picture", upload.single("profile_picture
   });
 });
 
+// ChatGPT - How do i save a completion images into my database and into my completion_image folder
 app.post("/bookings/:bookingId/completion-image", upload.single("image"), (req, res) => {
   const { bookingId } = req.params;
 
@@ -1387,10 +1392,10 @@ app.post("/bookings/:bookingId/completion-image", upload.single("image"), (req, 
   });
 });
 
-// Get count of pending disputes for handymen
+//ChatGPT - Get count of pending disputes for handymen
 app.get("/handyman/disputes/count/:handymanId", async (req, res) => {
   try {
-    const { handymanId } = req.params; // ✅ You forgot this line!
+    const { handymanId } = req.params; 
     const sql = "SELECT COUNT(*) AS count FROM disputes WHERE handyman_id = ? AND status = 'Pending Handyman'";
     const [result] = await db.query(sql, [handymanId]);
     res.json({ count: result.count });
@@ -1400,7 +1405,7 @@ app.get("/handyman/disputes/count/:handymanId", async (req, res) => {
   }
 });
 
-// Get count of new job requests for handymen
+// ChatGPT - Get count of new job requests for handymen
 app.get("/handyman/job-requests/count/:handymanId", async (req, res) => {
   try {
     const { handymanId } = req.params;
@@ -1413,7 +1418,7 @@ app.get("/handyman/job-requests/count/:handymanId", async (req, res) => {
   }
 });
 
-// Get count of active jobs for a handyman
+// ChatGPT - Get count of active jobs for a handyman
 app.get("/handyman/my-jobs/count/:handymanId", async (req, res) => {
   try {
     const { handymanId } = req.params;
@@ -1428,10 +1433,12 @@ app.get("/handyman/my-jobs/count/:handymanId", async (req, res) => {
 
 
 
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
 
 
 //References:

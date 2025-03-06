@@ -34,7 +34,7 @@ const Earnings = () => {
   //(React Flatlist,2024)
   return (
     <View style={styles.container}>
-      {/* 💰 Earnings Summary */}
+      {/*  Earnings Summary */}
       <View style={styles.earningsContainer}>
         <Text style={styles.earningsTitle}>Total Earnings</Text>
         <Text style={styles.earningsAmount}>€{totalEarnings.toFixed(2)}</Text>

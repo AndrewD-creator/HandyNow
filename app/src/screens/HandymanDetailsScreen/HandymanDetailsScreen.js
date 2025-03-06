@@ -9,14 +9,14 @@ import {
   Platform, ScrollView,
   Image,
 } from "react-native";
-import { useUser } from "../../context/UserContext";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { useUser } from "../../context/UserContext"; //(React Component, 2024)
+import DateTimePicker from "@react-native-community/datetimepicker";// (React Native DateTimePicker, 2024)
 import { Picker } from "@react-native-picker/picker"; 
-import axios from "axios";
+import axios from "axios";//(Axios HTTP Requests)
 import API_URL from "../../config/apiConfig"; 
-import { useRouter } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import { FontAwesome } from "@expo/vector-icons";
+import { useRouter } from "expo-router";//(Expo Router for navigation, 2024)
+import { MaterialIcons } from "@expo/vector-icons";//(Expo Vector Icons)
+import { FontAwesome } from "@expo/vector-icons";//(Expo Vector Icons)
 
 const durations = [
   { label: "1 Hour", value: 60 },
@@ -35,6 +35,7 @@ const HandymanDetailsScreen = () => {
   const [existingBookings, setExistingBookings] = useState([]);
   const router = useRouter();
 
+  // Booking logic (OpenAI)
   useEffect(() => {
     if (selectedHandyman?.id) {
       fetchAvailableTimes();
@@ -59,7 +60,7 @@ const HandymanDetailsScreen = () => {
       setAvailableTimes(response.data.times);
     } catch (error) {
       console.error("Error fetching times:", error.message);
-      setAvailableTimes([]); // ✅ Prevents UI from breaking
+      setAvailableTimes([]); 
     }
   };
   
@@ -71,24 +72,24 @@ const HandymanDetailsScreen = () => {
         let currentTime = startTime;
         const requiredSlots = [];
   
-        // 🔹 Generate required time slots
+        //  Generate required time slots
         for (let i = 0; i < value / 60; i++) {
           currentTime = calculateEndTime(currentTime, 60);
           requiredSlots.push(currentTime);
         }
   
-        // ✅ Convert "HH:mm:ss" → "HH:mm"
+        //  Convert "HH:mm:ss" → "HH:mm"
         const formattedSlots = requiredSlots.map((time) => time.slice(0, 5));
   
         console.log(`🔍 Checking Time Blocks: ${formattedSlots}`);
         console.log(`📅 Available Times: ${availableTimes}`);
   
-        // 🔹 Allow if all slots exist OR first required slot matches an end time of an existing booking
+        //  Allow if all slots exist OR first required slot matches an end time of an existing booking
         const isAvailable = formattedSlots.every((slot, index) => {
           const isFirstSlot = index === 0;
   
           return (
-            availableTimes.includes(slot) || // ✅ Slot exists in available times
+            availableTimes.includes(slot) || //  Slot exists in available times
             (isFirstSlot && existingBookings.some((booking) => booking.end_time.slice(0, 5) === slot)) // ✅ First slot is a previous booking’s end time
           );
         });
@@ -97,12 +98,12 @@ const HandymanDetailsScreen = () => {
   
         return isAvailable;
       })
-      .map(({ value }) => value); // ✅ Extract only duration values
+      .map(({ value }) => value); // Extract only duration values
   };
   
   
 
-  // 🔹 Handle Booking Submission
+  //  Handle Booking Submission
   const handleBooking = async () => {
     if (!startTime || !description) {
       Alert.alert("Error", "Please select a time and enter a description.");
@@ -117,7 +118,7 @@ const HandymanDetailsScreen = () => {
       return;
     }
 
-    // ✅ Define bookingData before logging it
+    //  Define bookingData before logging it
     const bookingData = {
         handymanId: selectedHandyman.id,
         userId: user.id,
@@ -130,6 +131,7 @@ const HandymanDetailsScreen = () => {
 
     console.log("📌 Sending Booking Data:", bookingData);
       
+    //(Inspired by Axios HTTP Requests)
     try {
       const response = await axios.post(`${API_URL}/bookings`, bookingData);
   
@@ -142,22 +144,22 @@ const HandymanDetailsScreen = () => {
     } catch (error) {
       console.error("❌ Error creating booking:", error.response?.data || error.message);
       
-      // 🔹 Show user-friendly alert if time slot is already booked
+      //  Show user-friendly alert if time slot is already booked
       Alert.alert("Booking Unavailable", error.response?.data?.error || "Failed to create booking.");
     }
 };
 
 
 
-  // 🔹 Calculate End Time Based on Duration
+  //  Calculate End Time Based on Duration
   const calculateEndTime = (start, duration) => {
     if (!start) return null; // 🔹 Prevents undefined error
   
     const [hour, minute] = start.split(":").map(Number); // Convert "09:00" -> [9, 0]
-    if (isNaN(hour) || isNaN(minute)) return null; // 🔹 Prevent invalid values
+    if (isNaN(hour) || isNaN(minute)) return null; //  Prevent invalid values
   
-    const endMinutes = hour * 60 + minute + duration; // 🔹 Convert to total minutes
-    const endHour = Math.floor(endMinutes / 60) % 24; // 🔹 Prevent overflow
+    const endMinutes = hour * 60 + minute + duration; //  Convert to total minutes
+    const endHour = Math.floor(endMinutes / 60) % 24; //  Prevent overflow
     const endMinute = endMinutes % 60;
   
     const formattedEndTime = `${endHour.toString().padStart(2, "0")}:${endMinute.toString().padStart(2, "0")}:00`;
@@ -166,7 +168,7 @@ const HandymanDetailsScreen = () => {
     return formattedEndTime;
   };
   
-
+// Main UI (adapted from Material UI styling, React Native TextInput Documentation, & OpenAI Prompt: - How do I make my handymanDetails page include their average rating along with their skills, 2024)
   return (
     <ScrollView style={styles.container}>
       <View style={styles.card}>
@@ -249,7 +251,7 @@ const HandymanDetailsScreen = () => {
           />
         )}
 
-        {/* 🔹 Time Slot Selection */}
+        {/*  Time Slot Selection */}
         <Text style={styles.subtitle}>Select a time:</Text>
         <View style={styles.timeContainer}>
   {availableTimes.length > 0 ? (
@@ -266,17 +268,17 @@ const HandymanDetailsScreen = () => {
       </TouchableOpacity>
     ))
   ) : (
-    <Text>No Available Times</Text> // ✅ Show message when no times exist
+    <Text>No Available Times</Text> //  Show message when no times exist
   )}
 </View>
 
 
-    {/* 🔹 Duration Selection */}
+    {/*  Duration Selection */}
 <Text style={styles.subtitle}>Select Duration:</Text>
 <View style={styles.timeContainer}>
   {durations.map((min) => {
     const availableDurations = getAvailableDurations(startTime);
-    const isAvailable = availableDurations.includes(Number(min.value)); // 🔥 Ensures data type match
+    const isAvailable = availableDurations.includes(Number(min.value)); //  Ensures data type match
 
     console.log(`🚀 Checking UI: Start=${startTime}, Duration=${min.value}, Available Durations:`, availableDurations);
     console.log(`🟢 UI Duration Check: ${min.value} | Available: ${isAvailable}`);
@@ -287,7 +289,7 @@ const HandymanDetailsScreen = () => {
         style={[
           styles.timeSlot,
           duration === min.value && styles.selectedSlot,
-          !isAvailable && styles.disabledSlot, // ✅ Only disable if unavailable
+          !isAvailable && styles.disabledSlot, //  Only disable if unavailable
         ]}
         onPress={() => isAvailable && setDuration(min.value)}
         disabled={!isAvailable}

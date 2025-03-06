@@ -66,7 +66,7 @@ const InvoiceScreen = () => {
   );
 };
 
-// 🔹 **Updated Styles**
+
 // (React Native Styling, 2024) 
   // ChatGPT - Prompt: "How do I style an invoice UI"
 
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   loader: { flex: 1, justifyContent: "center" },
   errorText: { fontSize: 18, color: "red", textAlign: "center", marginTop: 20 },
 
-  // 🔹 Invoice Box
+  //  Invoice Box
   invoiceBox: {
     backgroundColor: "#FFF",
     width: "90%",
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   detail: { fontSize: 16, marginBottom: 6, color: "#555" },
   amount: { fontSize: 22, fontWeight: "bold", color: "#4A4A8E", marginTop: 16 },
 
-  // 🔹 Status Box
+  //  Status Box
   statusBox: {
     paddingVertical: 6,
     paddingHorizontal: 20,

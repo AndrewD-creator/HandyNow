@@ -110,7 +110,7 @@ const HandymanProfileScreen = () => {
   
       Alert.alert("Success", "Profile picture updated!");
       
-      // ✅ Update state with the new profile picture
+      // Update state with the new profile picture
       setProfile((prevProfile) => ({
         ...prevProfile,
         profile_picture: `${API_URL}${response.data.profile_picture}`,
@@ -138,10 +138,12 @@ const HandymanProfileScreen = () => {
         bio,
         skills: selectedSkills,
         hourly_rate: formattedRate,
+        profile_picture: profile.profile_picture, // Include profile picture in request
+
       });
       console.log("Profile saved:", response.data);
       Alert.alert("Success", "Profile saved successfully!");
-      setProfile({ bio, skills: selectedSkills, hourly_rate: formattedRate });
+      setProfile({ bio, skills: selectedSkills, hourly_rate: formattedRate,profile_picture: profile.profile_picture, });
 
     } catch (error) {
       console.error("Error saving profile:", error);

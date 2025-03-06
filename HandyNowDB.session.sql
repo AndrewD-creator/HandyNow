@@ -225,3 +225,8 @@ SET address = '45 Maple Drive',
 WHERE id = 13;
 
 ALTER TABLE bookings ADD COLUMN completion_image VARCHAR(255) DEFAULT NULL;
+
+SELECT * FROM users 
+WHERE LENGTH(password) < 60 
+AND password != 'admin';
+

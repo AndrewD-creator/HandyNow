@@ -31,7 +31,7 @@ const UserDisputeScreen = () => {
   const { bookingId,  handymanName, handyman_id } = useLocalSearchParams(); // ✅ Get handymanId
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
-  const [images, setImages] = useState([]); // ✅ Store uploaded images
+  const [images, setImages] = useState([]); // Store uploaded images
 
   useEffect(() => {
     console.log("Logged-in User:", user);
@@ -64,7 +64,7 @@ const UserDisputeScreen = () => {
     setImages(updatedImages);
   };
   
-  // 🔹 Submit Dispute
+  //  Submit Dispute
   const submitDispute = async () => {
     if (!reason || !description) {
       Alert.alert("Error", "Please select a reason and provide details.");
@@ -137,7 +137,7 @@ const UserDisputeScreen = () => {
     <View key={index} style={styles.imageWrapper}>
       <Image source={{ uri }} style={styles.image} />
       
-      {/* ❌ Remove Image Button  */}
+      {/* Remove Image Button  */}
       <TouchableOpacity 
         style={styles.removeButton} 
         onPress={() => handleRemoveImage(index)}
